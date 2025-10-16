@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { updateProfile, updateEmail, updatePassword } from 'firebase/auth';
+import { updateProfile, updatePassword } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './Profile.css';
