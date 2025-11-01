@@ -8,6 +8,7 @@ import CustomBuilder from './pages/CustomBuilder/CustomBuilder.page';
 import Checkout from './pages/Checkout/Checkout.page';
 import Profile from './pages/Profile/Profile.page';
 import Login from './pages/Login/Login.page';
+import Contact from './pages/ContactUs/Contact.page';
 import './App.css';
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
             path="/build-custom" 
             element={<CustomBuilder addToCart={addToCart} />} 
           />
+          <Route path="/contact" element={<Contact/>} />
           <Route 
             path="/checkout" 
             element={

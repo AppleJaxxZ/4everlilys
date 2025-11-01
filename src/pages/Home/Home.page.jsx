@@ -7,9 +7,9 @@ function Home() {
     <div className="home-container">
       <section className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">Welcome to 4everLilys Wood Crafts</h1>
+          <h1 className="hero-title">Welcome 4EverLilys Wood Crafts</h1>
           <p className="hero-subtitle">
-            Handcrafted wooden gifts made with love and care
+            Handcrafted wood and epoxy resin gifts made with love and care
           </p>
           <p className="hero-description">
             Create your perfect personalized gift with our custom builder. 

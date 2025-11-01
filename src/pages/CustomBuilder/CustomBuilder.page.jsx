@@ -2,13 +2,34 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CustomBuilder.css';
 
+
 // TEMPLATE DATA - Easily customizable
 const GIFTS = [
-  { id: 1, name: 'Gift 1', image: '/images/gifts/gift1.jpg', basePrice: 25 },
-  { id: 2, name: 'Gift 2', image: '/images/gifts/gift2.jpg', basePrice: 30 },
-  { id: 3, name: 'Gift 3', image: '/images/gifts/gift3.jpg', basePrice: 35 },
-  { id: 4, name: 'Gift 4', image: '/images/gifts/gift4.jpg', basePrice: 28 },
-  { id: 5, name: 'Gift 5', image: '/images/gifts/gift5.jpg', basePrice: 32 },
+  /******Lazy Susans******/
+  { id: 1, name: 'Lazy Susans', image: '/images/gifts/lrg_lzy_flr.jpg',  basePrice: 50,
+     sizes : [
+    { id: 1, name: '8" Small', image: '/images/sizes/small.jpg', priceModifier: 50 },
+    { id: 2, name: '14" Medium 3/4inch + thickness', image: '/images/sizes/medium.jpg', priceModifier: 160 },
+    { id: 3, name: '20" Large', image: '/images/sizes/large.jpg', priceModifier: 275 },
+  ] },
+  /******CuttingBoardss******/
+  { id: 2, name: 'Cutting Boards', image: '/images/gifts/IMG_2107.jpg', basePrice: 30,
+    sizes :[
+      { id: 1, name: '8" Small', image: '/images/sizes/small.jpg', priceModifier: 50 },
+      { id: 2, name: '14" Medium 3/4inch + thickness', image: '/images/sizes/medium.jpg', priceModifier: 160 },
+      { id: 3, name: '20" Large', image: '/images/sizes/large.jpg', priceModifier: 275 },
+    ]
+   },
+   /******Double Sides Waveboards******/
+  { id: 3, name: 'Double Sided Waveboards', image: '/images/gifts/image000000 (5).jpg', basePrice: 60, 
+    sizes :[
+      { id: 1, name: '8" Small', image: '/images/sizes/small.jpg', priceModifier: 50 },
+      { id: 2, name: '14" Medium 3/4inch + thickness', image: '/images/sizes/medium.jpg', priceModifier: 160 },
+      { id: 3, name: '20" Large', image: '/images/sizes/large.jpg', priceModifier: 275 },
+    ]
+   },
+  { id: 4, name: 'Coasters', image: '/images/gifts/IMG_2110.jpg', basePrice: 35 },
+  { id: 5, name: 'Trinket Trays', image: '/images/gifts/trinketTrays.jpg', basePrice: 25 },
   { id: 6, name: 'Gift 6', image: '/images/gifts/gift6.jpg', basePrice: 40 },
   { id: 7, name: 'Gift 7', image: '/images/gifts/gift7.jpg', basePrice: 27 },
   { id: 8, name: 'Gift 8', image: '/images/gifts/gift8.jpg', basePrice: 33 },
@@ -16,22 +37,17 @@ const GIFTS = [
   { id: 10, name: 'Gift 10', image: '/images/gifts/gift10.jpg', basePrice: 45 }
 ];
 
-const SIZES = [
-  { id: 1, name: 'Small', image: '/images/sizes/small.jpg', priceModifier: 0 },
-  { id: 2, name: 'Medium', image: '/images/sizes/medium.jpg', priceModifier: 10 },
-  { id: 3, name: 'Large', image: '/images/sizes/large.jpg', priceModifier: 20 },
-  { id: 4, name: 'Extra Large', image: '/images/sizes/xlarge.jpg', priceModifier: 30 }
-];
+
 
 const COLORS = [
-  { id: 1, name: 'Natural Wood', hex: '#DEB887', priceModifier: 0 },
-  { id: 2, name: 'Dark Walnut', hex: '#654321', priceModifier: 5 },
-  { id: 3, name: 'Cherry Red', hex: '#8B0000', priceModifier: 5 },
-  { id: 4, name: 'Ocean Blue', hex: '#4682B4', priceModifier: 5 },
-  { id: 5, name: 'Forest Green', hex: '#228B22', priceModifier: 5 },
-  { id: 6, name: 'Sunset Orange', hex: '#FF8C00', priceModifier: 5 },
-  { id: 7, name: 'Royal Purple', hex: '#6A0DAD', priceModifier: 5 },
-  { id: 8, name: 'Ivory White', hex: '#FFFFF0', priceModifier: 5 }
+  { id: 1, name: 'Black Walnut', hex: '#DEB887', priceModifier: 0 },
+  { id: 2, name: 'Cherry', hex: '#654321', priceModifier: 5 },
+  { id: 3, name: 'Maple', hex: '#8B0000', priceModifier: 5 },
+  { id: 4, name: 'Walnut', hex: '#4682B4', priceModifier: 5 },
+  { id: 5, name: 'Acadia', hex: '#228B22', priceModifier: 5 },
+  // { id: 6, name: 'Sunset Orange', hex: '#FF8C00', priceModifier: 5 },
+  // { id: 7, name: 'Royal Purple', hex: '#6A0DAD', priceModifier: 5 },
+  // { id: 8, name: 'Ivory White', hex: '#FFFFF0', priceModifier: 5 }
 ];
 
 function CustomBuilder({ addToCart }) {
@@ -153,7 +169,7 @@ function CustomBuilder({ addToCart }) {
               <p>Selected Gift: <strong>{selectedGift.name}</strong></p>
             </div>
             <div className="sizes-grid">
-              {SIZES.map(size => (
+              {selectedGift.sizes.map(size => (
                 <div 
                   key={size.id} 
                   className="size-card"

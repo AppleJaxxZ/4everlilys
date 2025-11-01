@@ -30,7 +30,7 @@ function Navbar({ user, cartCount }) {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo" onClick={closeMenu}>
-          4everLilys Wood Crafts
+          4EverLilys Wood Crafts
         </Link>
 
         <div className="hamburger" onClick={toggleMenu}>
@@ -49,6 +49,10 @@ function Navbar({ user, cartCount }) {
             <Link to="/build-custom" className="nav-link" onClick={closeMenu}>
               Build Custom Gift
             </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="contact" className="nav-link" onClick={closeMenu}>Contact Us</Link>
+
           </li>
           <li className="nav-item">
             <Link to="/checkout" className="nav-link" onClick={closeMenu}>

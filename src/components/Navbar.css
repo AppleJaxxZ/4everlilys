@@ -1,3 +1,5 @@
+
+
 .navbar {
     background-color: var(--primary-color);
     box-shadow: var(--shadow);
@@ -5,6 +7,9 @@
     top: 0;
     z-index: 1000;
     width: 100%;
+    background-image: url('/public/images/gifts/IMG_3967.JPG');
+    background-position: center 45%;
+background-size: cover;
   }
   
   .navbar-container {
@@ -19,6 +24,7 @@
   
   .navbar-logo {
     font-size: 1.5rem;
+    font-family: "Great Vibes", cursive;
     font-weight: 700;
     color: var(--background);
     text-decoration: none;

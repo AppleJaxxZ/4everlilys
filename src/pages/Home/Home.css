@@ -4,7 +4,7 @@
   
   /* Hero Section */
   .hero-section {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+   
     color: var(--background);
     padding: 80px 20px;
     text-align: center;
@@ -13,30 +13,39 @@
     align-items: center;
     justify-content: center;
   }
-  
+  .hero-section::before {
+  background: linear-gradient(
+    rgba(0,0,0,0.5),
+    rgba(0,0,0,0.3)
+  );
+}
   .hero-content {
     max-width: 800px;
     margin: 0 auto;
   }
   
+  
+ 
   .hero-title {
-    color: var(--background);
+    color: black;
     margin-bottom: 20px;
+    font-family: "Great Vibes", cursive;
+    font-weight: 100;
     font-size: clamp(2.5rem, 6vw, 4rem);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.2);
   }
   
   .hero-subtitle {
     font-size: clamp(1.2rem, 3vw, 1.8rem);
-    margin-bottom: 20px;
-    color: var(--secondary-color);
-    font-weight: 300;
+    margin-bottom: 40px;
+    color: black;
+    font-weight: 600;
   }
   
   .hero-description {
     font-size: clamp(1rem, 2vw, 1.2rem);
     margin-bottom: 40px;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(62, 57, 57, 0.95);
     line-height: 1.8;
     max-width: 700px;
     margin-left: auto;
@@ -58,8 +67,8 @@
   }
   
   .cta-button:hover {
-    background-color: transparent;
-    color: var(--background);
+    background-color: white;
+    color: black;
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   }
