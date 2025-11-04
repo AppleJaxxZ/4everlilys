@@ -54,7 +54,7 @@ function SquarePayment({ amount, items, onPaymentSuccess, onPaymentError }) {
           const preparedItems = prepareItemsForPayment(items);
           
           // Call YOUR backend (not Square directly)
-          const response = await fetch('http://localhost:3001/api/process-payment', {
+          const response = await fetch(process.env.REACT_APP_BACKEND_URL, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
