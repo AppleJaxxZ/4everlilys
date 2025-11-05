@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk';
+import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner.component';
 
 function SquarePayment({ amount, items, onPaymentSuccess, onPaymentError }) {
+  const [loading, setLoading] = useState(false);
   // Function to prepare items with images for payment
   const prepareItemsForPayment = (items) => {
     return items.map(item => {
@@ -49,12 +51,15 @@ function SquarePayment({ amount, items, onPaymentSuccess, onPaymentError }) {
       applicationId={process.env.REACT_APP_SQUARE_APP_ID}
       locationId={process.env.REACT_APP_SQUARE_LOCATION_ID}
       cardTokenizeResponseReceived={async (token, verifiedBuyer) => {
+        setLoading(true);
         try {
           // Prepare items with images
           const preparedItems = prepareItemsForPayment(items);
-          
+          const backendUrl = process.env.REACT_APP_BACKEND_URL;
+          console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
+
           // Call YOUR backend (not Square directly)
-          const response = await fetch(process.env.REACT_APP_BACKEND_URL, {
+          const response = await fetch(`${backendUrl}/api/process-payment`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -76,6 +81,8 @@ function SquarePayment({ amount, items, onPaymentSuccess, onPaymentError }) {
         } catch (error) {
           console.error('Payment error:', error);
           onPaymentError(error.message);
+        } finally {
+          setLoading(false);
         }
       }}
       createVerificationDetails={() => ({
@@ -94,6 +101,7 @@ function SquarePayment({ amount, items, onPaymentSuccess, onPaymentError }) {
       })}
     >
       <CreditCard />
+      {loading && <LoadingSpinner />}
     </PaymentForm>
   );
 }

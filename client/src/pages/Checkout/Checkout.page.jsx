@@ -8,6 +8,8 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
   const [showPayment, setShowPayment] = useState(false); // NEW
   const [paymentSuccess, setPaymentSuccess] = useState(false); // NEW
   const [paymentError, setPaymentError] = useState(null); // NEW
+  const [feeBreakdown, setFeeBreakdown] = useState(null);
+
 
   const validCart = cart.filter(item => item && item.id && item.name);
 
@@ -30,7 +32,10 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
     console.log('Payment successful:', result);
     setPaymentSuccess(true);
     setPaymentError(null);
-  
+
+    setFeeBreakdown(result.payment.breakdown);
+
+    
     const receipt = {
       payment: result.payment,
       items: validCart,
@@ -167,27 +172,56 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
           <div className="cart-summary">
             <h2>Order Summary</h2>
             
-            <div className="summary-row">
-              <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
-              <span>${calculateTotal().toFixed(2)}</span>
-            </div>
+            {feeBreakdown ? (
+  <>
+    <div className="summary-row">
+      <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
+      <span>${feeBreakdown.subtotal}</span>
+    </div>
 
-            <div className="summary-row">
-              <span>Shipping</span>
-              <span>Calculated at checkout</span>
-            </div>
+    <div className="summary-row">
+      <span>Tax (PA 6%)</span>
+      <span>${feeBreakdown.tax}</span>
+    </div>
 
-            <div className="summary-row">
-              <span>Tax</span>
-              <span>Calculated at checkout</span>
-            </div>
+    <div className="summary-row">
+      <span>Square Fee (2.9% + $0.30)</span>
+      <span>${feeBreakdown.squareFee}</span>
+    </div>
 
-            <div className="summary-divider"></div>
+    <div className="summary-divider"></div>
 
-            <div className="summary-row total">
-              <span>Total</span>
-              <span>${calculateTotal().toFixed(2)}</span>
-            </div>
+    <div className="summary-row total">
+      <span>Total</span>
+      <span>${feeBreakdown.total}</span>
+    </div>
+  </>
+) : (
+  <>
+    <div className="summary-row">
+      <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
+      <span>${calculateTotal().toFixed(2)}</span>
+    </div>
+
+    <div className="summary-row">
+      <span>Tax</span>
+      <span>Calculated at checkout</span>
+    </div>
+
+    <div className="summary-row">
+      <span>Square Fee</span>
+      <span>Calculated at checkout</span>
+    </div>
+
+    <div className="summary-divider"></div>
+
+    <div className="summary-row total">
+      <span>Total</span>
+      <span>${calculateTotal().toFixed(2)}</span>
+    </div>
+  </>
+)}
+
 
             {/* NEW: Show Square Payment Form or Checkout Button */}
             {!showPayment ? (

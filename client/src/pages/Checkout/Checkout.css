@@ -330,6 +330,18 @@
   padding: 20px;
   background: #f8f9fa;
   border-radius: 10px;
+  position: relative;
+  z-index: 10;
+  overflow: visible;
+  min-height: 300px;
+  background: rgba(5, 5, 5, 0.1); /* remove after testing */
+}
+
+
+.payment-container iframe {
+  pointer-events: auto;
+  z-index: 11;
+  position: relative;
 }
 
 .payment-error {

@@ -28,6 +28,8 @@ const client = new Client({
 
 console.log('✅ Square client initialized');
 
+
+
 // Helper function to create or update catalog item with image
 async function createCatalogItemWithImage(item) {
   try {
@@ -137,6 +139,29 @@ app.post('/api/process-payment', async (req, res) => {
   }
 
   try {
+
+        // Step 1: Calculate subtotal
+        const subtotal = items.reduce((sum, item) => {
+          const price = item.totalPrice || item.price || 0;
+          const quantity = item.quantity || 1;
+          return sum + price * quantity;
+        }, 0);
+    
+        // Step 2: Calculate tax and Square fee
+        const taxRate = 0.06;
+        const squareFeeRate = 0.029;
+        const squareFixedFee = 0.30;
+    
+        const taxAmount = subtotal * taxRate;
+        const totalBeforeFees = subtotal + taxAmount;
+        const squareFee = totalBeforeFees * squareFeeRate + squareFixedFee;
+        const finalTotal = totalBeforeFees + squareFee;
+    
+        // Step 3: Convert to cents
+        const amountInCents = Math.round(finalTotal * 100);
+    
+
+
     // Process each item and create catalog entries if needed
     const processedItems = [];
     
@@ -209,8 +234,8 @@ app.post('/api/process-payment', async (req, res) => {
       locationId: process.env.SQUARE_LOCATION_ID,
       orderId: order.id,
       amountMoney: {
-        amount: Number(order.totalMoney.amount),
-        currency: order.totalMoney.currency,
+        amount: amountInCents,
+        currency: 'USD',
       },
     });
 
@@ -221,13 +246,20 @@ app.post('/api/process-payment', async (req, res) => {
       payment: {
         id: payment.id,
         status: payment.status,
-        amount: Number(payment.amountMoney.amount),
+        amount: amountInCents,
         currency: payment.amountMoney.currency,
         createdAt: payment.createdAt,
         orderId: payment.orderId,
         receiptUrl: payment.receiptUrl,
+        breakdown: {
+          subtotal: subtotal.toFixed(2),
+          tax: taxAmount.toFixed(2),
+          squareFee: squareFee.toFixed(2),
+          total: finalTotal.toFixed(2),
+        },
       },
     });
+    
   } catch (error) {
     console.error('❌ Payment failed:', error);
     res.status(500).json({

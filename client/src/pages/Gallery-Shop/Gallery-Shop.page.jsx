@@ -28,7 +28,7 @@ const GALLERY_DATA = {
       { id: 12, name: 'Green Wave Board', price: 165, image: '/images/gallery/river2.jpg' },
     ],
     'river-tables': [
-      { id: 13, name: 'Ocean River Table', price: 1200, image: '/images/gallery/rivertable1.jpg' },
+      { id: 13, name: 'Ocean River Table', price: 1200, image: '/images/gallery/IMG_1692.jpg' },
       { id: 14, name: 'Lake River Table', price: 950, image: '/images/gallery/rivertable2.jpg' },
     ],
     'skulls': [
