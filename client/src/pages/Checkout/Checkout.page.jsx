@@ -9,6 +9,8 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
   const [paymentSuccess, setPaymentSuccess] = useState(false); // NEW
   const [paymentError, setPaymentError] = useState(null); // NEW
   const [feeBreakdown, setFeeBreakdown] = useState(null);
+  const [cartSnapshot, setCartSnapshot] = useState([]);
+
 
 
   const validCart = cart.filter(item => item && item.id && item.name);
@@ -32,23 +34,22 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
     console.log('Payment successful:', result);
     setPaymentSuccess(true);
     setPaymentError(null);
-
     setFeeBreakdown(result.payment.breakdown);
-
-    
+    setCartSnapshot(validCart); // ✅ preserve cart before clearing
+  
     const receipt = {
       payment: result.payment,
       items: validCart,
       rawResult: result,
     };
   
-    // ✅ Clear the cart
     cart.forEach(item => removeFromCart(item.id));
   
     setTimeout(() => {
       navigate('/order-confirmation', { state: { receipt } });
     }, 2000);
   };
+  
   
   
 
@@ -175,13 +176,13 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
             {feeBreakdown ? (
   <>
     <div className="summary-row">
-      <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
+      <span>Subtotal ({cartSnapshot.length} {cartSnapshot.length === 1 ? 'item' : 'items'})</span>
       <span>${feeBreakdown.subtotal}</span>
     </div>
 
     <div className="summary-row">
       <span>Tax (PA 6%)</span>
-      <span>${feeBreakdown.tax}</span>
+      <span>${feeBreakdown.tax || '0.00'}</span>
     </div>
 
     <div className="summary-row">

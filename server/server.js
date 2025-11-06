@@ -232,12 +232,12 @@ app.post('/api/process-payment', async (req, res) => {
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       locationId: process.env.SQUARE_LOCATION_ID,
-      orderId: order.id,
       amountMoney: {
         amount: amountInCents,
         currency: 'USD',
       },
     });
+    
 
     const payment = paymentResponse.result.payment;
 
