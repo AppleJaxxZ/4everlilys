@@ -8,7 +8,7 @@ function Payment({ cart, user, removeFromCart }) {
   const [shippingInfo, setShippingInfo] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [feeBreakdown, setFeeBreakdown] = useState(null);
 
   useEffect(() => {
