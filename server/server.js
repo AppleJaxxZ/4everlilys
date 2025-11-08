@@ -4,8 +4,9 @@ const cors = require('cors');
 const { Client, Environment } = require('square');
 const crypto = require('crypto');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
 require('dotenv').config();
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -29,14 +30,6 @@ const client = new Client({
     : Environment.Sandbox,
 });
 
-// Initialize email transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 console.log('✅ Square client initialized');
 console.log('✅ Email service initialized');
@@ -149,7 +142,7 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
     const subject = `New Order - ${shippingInfo.firstName} ${shippingInfo.lastName} - $${total}`;
 
     // --- 5. Send email ---
-    const info = await transporter.sendMail({
+    const info = await resend.emails.send({
       from: `"4EverLilys Orders" <${process.env.EMAIL_USER}>`,
       to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
       subject,
@@ -279,7 +272,7 @@ app.post('/api/process-payment', async (req, res) => {
 //
 app.post('/api/test-email', async (req, res) => {
   try {
-    const info = await transporter.sendMail({
+    const info = await resend.emails.send({
       from: `"Test Sender" <${process.env.EMAIL_USER}>`,
       to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
       subject: 'Test Email from 4EverLilys Server',
