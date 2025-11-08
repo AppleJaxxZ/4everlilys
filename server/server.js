@@ -1,24 +1,27 @@
+// Enhanced server with Square payments + email notifications
 const express = require('express');
 const cors = require('cors');
 const { Client, Environment } = require('square');
 const crypto = require('crypto');
 const multer = require('multer');
-const axios = require('axios');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Setup multer for image handling
-const upload = multer({ 
+// Configure file uploads
+const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://4everlilys.netlify.app', 'http://localhost:3000'],
+}));
 app.use(express.json({ limit: '10mb' }));
 
-// Initialize Square client
+// Initialize Square
 const client = new Client({
   accessToken: process.env.SQUARE_ACCESS_TOKEN,
   environment: process.env.SQUARE_ENV === 'production'
@@ -26,14 +29,147 @@ const client = new Client({
     : Environment.Sandbox,
 });
 
+// Initialize email transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 console.log('✅ Square client initialized');
+console.log('✅ Email service initialized');
+console.log('🚀 Server is loading environment...');
+console.log(process.env.NODE_ENV);
 
+//
+// Helper: Send order notification email
+//
+async function sendOrderNotificationEmail({ paymentId, amount, items, shippingInfo, orderDate }) {
+  try {
+    // --- 1. Fetch full payment details from Square ---
+    const { result } = await client.paymentsApi.getPayment(paymentId);
+    const payment = result.payment;
 
+    if (!payment) throw new Error('Payment not found in Square');
 
-// Helper function to create or update catalog item with image
+    console.log('📧 Sending order email with:', shippingInfo);
+
+    // --- 2. Format order items ---
+    const itemsList = items.map(item => {
+      let details = `
+        <li style="margin-bottom:15px;padding:10px;background:#f5f5f5;border-radius:5px;">
+          <strong>${item.name}</strong><br>
+          Quantity: ${item.quantity}<br>
+          Price: $${(item.totalPrice || item.price).toFixed(2)} each<br>
+          Subtotal: $${((item.totalPrice || item.price) * item.quantity).toFixed(2)}<br>`;
+      if (item.gift) {
+        details += `<br><strong>Custom Configuration:</strong><br>`;
+        if (item.gift.name) details += `Type: ${item.gift.name}<br>`;
+        if (item.size?.name) details += `Size: ${item.size.name}<br>`;
+        if (item.wood?.name) details += `Wood: ${item.wood.name}<br>`;
+        if (item.handle?.name) details += `Handle: ${item.handle.name}<br>`;
+        if (item.handleType?.name) details += `Handle Type: ${item.handleType.name}<br>`;
+        if (item.designs?.[0]?.name) details += `Design: ${item.designs[0].name}<br>`;
+      }
+      if (item.category) details += `Category: ${item.category}<br>`;
+      if (item.type) details += `Type: ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}<br>`;
+      details += `</li>`;
+      return details;
+    }).join('');
+
+    // --- 3. Totals ---
+    const subtotal = items.reduce((sum, i) => sum + ((i.totalPrice || i.price) * i.quantity), 0);
+    const tax = subtotal * 0.06;
+    const total = (amount / 100).toFixed(2);
+
+    const formattedDate = new Date(orderDate).toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // --- 4. Email HTML ---
+    const emailContent = `
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial; line-height:1.6; color:#333; }
+          .container { max-width:600px; margin:0 auto; padding:20px; }
+          .header { background:#2c3e50; color:white; padding:20px; border-radius:5px 5px 0 0; }
+          .content { background:white; padding:20px; border:1px solid #ddd; }
+          ul { list-style:none; padding:0; }
+          .footer { background:#f5f5f5; padding:15px; text-align:center; border-radius:0 0 5px 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 New Order Received!</h1>
+            <p>Payment Confirmed - Ready for Processing</p>
+          </div>
+          <div class="content">
+            <h2>Order Information</h2>
+            <p><strong>Date:</strong> ${formattedDate}</p>
+            <p><strong>Payment ID:</strong> ${paymentId}</p>
+            <p><strong>Status:</strong> ✅ ${payment.status}</p>
+            <p><strong>Receipt:</strong> <a href="${payment.receiptUrl}" target="_blank">View Receipt</a></p>
+            
+            <h2>Customer</h2>
+            <p>${shippingInfo.firstName} ${shippingInfo.lastName}<br>
+               ${shippingInfo.email}<br>${shippingInfo.phone}</p>
+            
+            <h2>Shipping</h2>
+            <p>${shippingInfo.address}<br>
+               ${shippingInfo.apartment ? shippingInfo.apartment + '<br>' : ''}
+               ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}<br>
+               ${shippingInfo.country}</p>
+
+            <h2>Items (${items.length})</h2>
+            <ul>${itemsList}</ul>
+
+            <h3>Totals</h3>
+            <p>Subtotal: $${subtotal.toFixed(2)}</p>
+            <p>Tax (6%): $${tax.toFixed(2)}</p>
+            <p><strong>Total Paid: $${total}</strong></p>
+          </div>
+          <div class="footer">
+            <p>Order received on ${formattedDate}</p>
+            <p>4EverLilys Wood Crafts</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const subject = `New Order - ${shippingInfo.firstName} ${shippingInfo.lastName} - $${total}`;
+
+    // --- 5. Send email ---
+    const info = await transporter.sendMail({
+      from: `"4EverLilys Orders" <${process.env.EMAIL_USER}>`,
+      to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
+      subject,
+      html: emailContent,
+    });
+
+    console.log('✅ Order notification email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+//
+// Helper: createCatalogItemWithImage (unchanged)
+//
 async function createCatalogItemWithImage(item) {
   try {
-    // Step 1: Create the catalog object (item)
     const catalogItem = {
       type: 'ITEM',
       id: `#${item.name.replace(/\s+/g, '_')}_${Date.now()}`,
@@ -45,268 +181,114 @@ async function createCatalogItemWithImage(item) {
           item.wood?.name && `Wood: ${item.wood.name}`,
           item.handle?.name && `Handle: ${item.handle.name}`,
           item.handleType?.name && `Handle Type: ${item.handleType.name}`,
-          item.designs?.length > 0 && `Designs: ${item.designs.map(d => d.name).join(', ')}`,
+          item.designs?.length && `Designs: ${item.designs.map(d => d.name).join(', ')}`,
           item.category && `Category: ${item.category}`,
         ].filter(Boolean).join(' | '),
-        variations: [
-          {
-            type: 'ITEM_VARIATION',
-            id: `#${item.name.replace(/\s+/g, '_')}_var_${Date.now()}`,
-            itemVariationData: {
-              name: 'Standard',
-              pricingType: 'FIXED_PRICING',
-              priceMoney: {
-                amount: Math.round((item.totalPrice || item.price || 0) * 100),
-                currency: 'USD',
-              },
+        variations: [{
+          type: 'ITEM_VARIATION',
+          id: `#${item.name.replace(/\s+/g, '_')}_var_${Date.now()}`,
+          itemVariationData: {
+            name: 'Standard',
+            pricingType: 'FIXED_PRICING',
+            priceMoney: {
+              amount: Number(Math.round((item.totalPrice || item.price || 0) * 100)),
+              currency: 'USD',
             },
           },
-        ],
+        }],
       },
     };
 
-    // Step 2: Handle image if provided
-    let catalogImage = null;
-    if (item.imageData || item.imageUrl) {
-      // Create catalog image object
-      const imageId = `#img_${Date.now()}`;
-      
-      if (item.imageData) {
-        // If we have base64 image data
-        const base64Data = item.imageData.replace(/^data:image\/\w+;base64,/, '');
-        const buffer = Buffer.from(base64Data, 'base64');
-        
-        // Upload image to Square
-        const imageUploadResponse = await client.catalogApi.createCatalogImage(
-          {
-            idempotencyKey: crypto.randomUUID(),
-            image: {
-              type: 'IMAGE',
-              id: imageId,
-              imageData: {
-                name: `${item.name}_image`,
-                caption: item.name,
-              },
-            },
-          },
-          {
-            file: buffer,
-          }
-        );
-        
-        catalogImage = imageUploadResponse.result.image;
-      } else if (item.imageUrl) {
-        // If we have an image URL, we'll add it to the item description
-        // Square doesn't support direct URL uploads, so we note it in description
-        catalogItem.itemData.description += ` | Image: ${item.imageUrl}`;
-      }
-    }
-
-    // Step 3: Create the catalog item
     const catalogResponse = await client.catalogApi.upsertCatalogObject({
       idempotencyKey: crypto.randomUUID(),
       object: catalogItem,
     });
 
-    const createdItem = catalogResponse.result.catalogObject;
-
-    // Step 4: If we have an uploaded image, link it to the item
-    if (catalogImage) {
-      await client.catalogApi.updateItemModifierLists({
-        itemIds: [createdItem.id],
-        modifierListsToEnable: [],
-        imageIds: [catalogImage.id],
-      });
-    }
-
-    return createdItem;
+    return catalogResponse.result.catalogObject;
   } catch (error) {
     console.error('Error creating catalog item:', error);
-    // Return null if catalog creation fails, payment can still proceed
     return null;
   }
 }
 
-// Main payment processing endpoint
+//
+// Main payment route
+//
 app.post('/api/process-payment', async (req, res) => {
-  const { sourceId, items } = req.body;
+  const { sourceId, items, shippingInfo } = req.body;
 
-  if (!sourceId || !items || !Array.isArray(items)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Missing or invalid payment data.',
-    });
+  if (!sourceId || !items) {
+    return res.status(400).json({ success: false, message: 'Missing payment data.' });
   }
 
   try {
+    // Calculate total
+    const subtotal = items.reduce((sum, item) => sum + ((item.totalPrice || item.price) * item.quantity), 0);
+    const tax = subtotal * 0.06;
+    const total = subtotal + tax;
+    const amountInCents = Number(Math.round(total * 100));
 
-        // Step 1: Calculate subtotal
-        const subtotal = items.reduce((sum, item) => {
-          const price = item.totalPrice || item.price || 0;
-          const quantity = item.quantity || 1;
-          return sum + price * quantity;
-        }, 0);
-    
-        // Step 2: Calculate tax and Square fee
-        const taxRate = 0.06;
-        const squareFeeRate = 0.029;
-        const squareFixedFee = 0.30;
-    
-        const taxAmount = subtotal * taxRate;
-        const totalBeforeFees = subtotal + taxAmount;
-        const squareFee = totalBeforeFees * squareFeeRate + squareFixedFee;
-        const finalTotal = totalBeforeFees + squareFee;
-    
-        // Step 3: Convert to cents
-        const amountInCents = Math.round(finalTotal * 100);
-    
-
-
-    // Process each item and create catalog entries if needed
-    const processedItems = [];
-    
-    for (const item of items) {
-      // Only create catalog items for custom items
-      if (item.isCustom || item.gift) {
-        const catalogItem = await createCatalogItemWithImage(item);
-        if (catalogItem) {
-          processedItems.push({
-            ...item,
-            catalogId: catalogItem.id,
-            variationId: catalogItem.itemData.variations[0].id,
-          });
-        } else {
-          processedItems.push(item);
-        }
-      } else {
-        processedItems.push(item);
-      }
-    }
-
-    // Build line items for the order
-    const lineItems = processedItems.map(item => {
-      const lineItem = {
-        name: item.name || 'Custom Item',
-        quantity: (item.quantity || 1).toString(),
-        basePriceMoney: {
-          amount: Math.round((item.totalPrice || item.price || 0) * 100),
-          currency: 'USD',
-        },
-        note: [
-          item.gift?.name && `Gift: ${item.gift.name}`,
-          item.size?.name && `Size: ${item.size.name}`,
-          item.wood?.name && `Wood: ${item.wood.name}`,
-          item.handle?.name && `Handle: ${item.handle.name}`,
-          item.handleType?.name && `Handle Type: ${item.handleType.name}`,
-          item.designs?.[0]?.name && `Design: ${item.designs[0].name}`,
-          item.category && `Category: ${item.category}`,
-          item.type && `Type: ${item.type}`,
-          item.imageUrl && `View Image: ${item.imageUrl}`,
-        ].filter(Boolean).join(' | '),
-      };
-
-      // If we created a catalog item, link it
-      if (item.catalogId && item.variationId) {
-        lineItem.catalogObjectId = item.variationId;
-      }
-
-      return lineItem;
-    });
-
-    // Create the order
-    const orderResponse = await client.ordersApi.createOrder({
-      order: {
-        locationId: process.env.SQUARE_LOCATION_ID,
-        lineItems,
-        metadata: {
-          source: 'custom_builder_app',
-          hasCustomItems: items.some(i => i.isCustom || i.gift) ? 'true' : 'false',
-        },
-      },
-    });
-
-    const order = orderResponse.result.order;
-
-    // Create the payment
+    // Create payment
     const paymentResponse = await client.paymentsApi.createPayment({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       locationId: process.env.SQUARE_LOCATION_ID,
-      amountMoney: {
-        amount: amountInCents,
-        currency: 'USD',
-      },
+      amountMoney: { amount: Number(amountInCents), currency: 'USD' },
     });
-    
 
     const payment = paymentResponse.result.payment;
+    console.log('📧 Email Payload:', {
+      paymentId: payment.id,
+      amount: Number(amountInCents),
+      items,
+      shippingInfo,
+      orderDate: new Date().toISOString()
+    });
+
+    // Send order email
+    const emailResult = await sendOrderNotificationEmail({
+      paymentId: payment.id,
+      amount: Number(amountInCents),
+      items,
+      shippingInfo,
+      orderDate: new Date().toISOString()
+    });
 
     res.json({
       success: true,
       payment: {
         id: payment.id,
         status: payment.status,
-        amount: amountInCents,
+        amount: Number(payment.amountMoney.amount),
         currency: payment.amountMoney.currency,
         createdAt: payment.createdAt,
         orderId: payment.orderId,
         receiptUrl: payment.receiptUrl,
-        breakdown: {
-          subtotal: subtotal.toFixed(2),
-          tax: taxAmount.toFixed(2),
-          squareFee: squareFee.toFixed(2),
-          total: finalTotal.toFixed(2),
-        },
       },
+      email: emailResult,
     });
     
   } catch (error) {
     console.error('❌ Payment failed:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Payment processing failed.',
-      details: error.errors || [],
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Endpoint to upload image separately (optional)
-app.post('/api/upload-image', upload.single('image'), async (req, res) => {
+//
+// Test email endpoint
+//
+app.post('/api/test-email', async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No image provided' });
-    }
-
-    // Upload to Square's catalog
-    const imageResponse = await client.catalogApi.createCatalogImage(
-      {
-        idempotencyKey: crypto.randomUUID(),
-        image: {
-          type: 'IMAGE',
-          id: `#img_${Date.now()}`,
-          imageData: {
-            name: req.body.name || 'Product Image',
-            caption: req.body.caption || '',
-          },
-        },
-      },
-      {
-        file: req.file.buffer,
-      }
-    );
-
-    res.json({
-      success: true,
-      imageId: imageResponse.result.image.id,
-      imageUrl: imageResponse.result.image.imageData.url,
+    const info = await transporter.sendMail({
+      from: `"Test Sender" <${process.env.EMAIL_USER}>`,
+      to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
+      subject: 'Test Email from 4EverLilys Server',
+      text: 'This is a plain text test email.',
     });
+    res.json({ success: true, messageId: info.messageId });
   } catch (error) {
-    console.error('Image upload failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Image upload failed',
-      error: error.message,
-    });
+    console.error('❌ Test email failed:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

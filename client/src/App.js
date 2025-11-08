@@ -6,6 +6,8 @@ import Navbar from './components/Navbar.component';
 import Home from './pages/Home/Home.page';
 import CustomBuilder from './pages/CustomBuilder/CustomBuilder.page';
 import Checkout from './pages/Checkout/Checkout.page';
+import Shipping from './pages/Shipping/Shipping.page';
+import Payment from './pages/Payment/Payment.page';
 import Profile from './pages/Profile/Profile.page';
 import Login from './pages/Login/Login.page';
 import Contact from './pages/ContactUs/Contact.page';
@@ -20,7 +22,6 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
     });
     return () => unsubscribe();
   }, []);
@@ -72,19 +73,37 @@ function App() {
             element={<CustomBuilder addToCart={addToCart} />} 
           />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          
           <Route path="/contact" element={<Contact/>} />
           <Route 
-  path="/checkout" 
-  element={
-    <Checkout 
-      cart={cart} 
-      user={user}
-      updateQuantity={updateCartQuantity}  // This matches now
-      removeFromCart={removeFromCart}
-    />
-  } 
-/>
+            path="/checkout" 
+            element={
+              <Checkout 
+                cart={cart} 
+                user={user}
+                updateQuantity={updateCartQuantity}
+                removeFromCart={removeFromCart}
+              />
+            } 
+          />
+          <Route 
+            path="/shipping" 
+            element={
+              <Shipping 
+                cart={cart} 
+                user={user}
+              />
+            } 
+          />
+          <Route 
+            path="/payment" 
+            element={
+              <Payment 
+                cart={cart} 
+                user={user}
+                removeFromCart={removeFromCart}
+              />
+            } 
+          />
           <Route path="/gallery-shop" element={<Gallery addToCart={addToCart} />} />
           <Route path="/profile" element={<Profile user={user} />} />
           <Route path="/login" element={<Login />} />

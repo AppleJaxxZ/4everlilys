@@ -1,17 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import SquarePayment from '../../assests/SquarePayment';
 import './Checkout.css';
 
 function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
   const navigate = useNavigate();
-  const [showPayment, setShowPayment] = useState(false); // NEW
-  const [paymentSuccess, setPaymentSuccess] = useState(false); // NEW
-  const [paymentError, setPaymentError] = useState(null); // NEW
-  const [feeBreakdown, setFeeBreakdown] = useState(null);
-  const [cartSnapshot, setCartSnapshot] = useState([]);
-
-
 
   const validCart = cart.filter(item => item && item.id && item.name);
 
@@ -29,35 +21,8 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
     return price * quantity;
   };
 
-  // NEW: Handle payment success
-  const handlePaymentSuccess = (result) => {
-    console.log('Payment successful:', result);
-    setPaymentSuccess(true);
-    setPaymentError(null);
-    setFeeBreakdown(result.payment.breakdown);
-    setCartSnapshot(validCart); // ✅ preserve cart before clearing
-  
-    const receipt = {
-      payment: result.payment,
-      items: validCart,
-      rawResult: result,
-    };
-  
-    cart.forEach(item => removeFromCart(item.id));
-  
-    setTimeout(() => {
-      navigate('/order-confirmation', { state: { receipt } });
-    }, 2000);
-  };
-  
-  
-  
-
-  // NEW: Handle payment error
-  const handlePaymentError = (error) => {
-    console.error('Payment error:', error);
-    setPaymentError(error);
-    setPaymentSuccess(false);
+  const handleProceedToShipping = () => {
+    navigate('/shipping');
   };
 
   if (!validCart || validCart.length === 0) {
@@ -73,19 +38,6 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
           <button className="build-btn" onClick={() => navigate('/build-custom')}>
             Build Custom Item
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  // NEW: Show payment success message
-  if (paymentSuccess) {
-    return (
-      <div className="checkout-page">
-        <div className="payment-success">
-          <div className="success-icon">✓</div>
-          <h2>Payment Successful!</h2>
-          <p>Thank you for your purchase. Redirecting...</p>
         </div>
       </div>
     );
@@ -173,100 +125,44 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
           <div className="cart-summary">
             <h2>Order Summary</h2>
             
-            {feeBreakdown ? (
-  <>
-    <div className="summary-row">
-      <span>Subtotal ({cartSnapshot.length} {cartSnapshot.length === 1 ? 'item' : 'items'})</span>
-      <span>${feeBreakdown.subtotal}</span>
-    </div>
+            <div className="summary-row">
+              <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
+              <span>${calculateTotal().toFixed(2)}</span>
+            </div>
 
-    <div className="summary-row">
-      <span>Tax (PA 6%)</span>
-      <span>${feeBreakdown.tax || '0.00'}</span>
-    </div>
+            <div className="summary-row">
+              <span>Shipping</span>
+              <span>Calculated at checkout</span>
+            </div>
 
-    <div className="summary-row">
-      <span>Square Fee (2.9% + $0.30)</span>
-      <span>${feeBreakdown.squareFee}</span>
-    </div>
+            <div className="summary-row">
+              <span>Tax</span>
+              <span>Calculated at checkout</span>
+            </div>
 
-    <div className="summary-divider"></div>
+            <div className="summary-divider"></div>
 
-    <div className="summary-row total">
-      <span>Total</span>
-      <span>${feeBreakdown.total}</span>
-    </div>
-  </>
-) : (
-  <>
-    <div className="summary-row">
-      <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
-      <span>${calculateTotal().toFixed(2)}</span>
-    </div>
+            <div className="summary-row total">
+              <span>Subtotal</span>
+              <span>${calculateTotal().toFixed(2)}</span>
+            </div>
 
-    <div className="summary-row">
-      <span>Tax</span>
-      <span>Calculated at checkout</span>
-    </div>
+            <button 
+              className="checkout-btn"
+              onClick={handleProceedToShipping}
+            >
+              Proceed to Checkout
+            </button>
 
-    <div className="summary-row">
-      <span>Square Fee</span>
-      <span>Calculated at checkout</span>
-    </div>
-
-    <div className="summary-divider"></div>
-
-    <div className="summary-row total">
-      <span>Total</span>
-      <span>${calculateTotal().toFixed(2)}</span>
-    </div>
-  </>
-)}
-
-
-            {/* NEW: Show Square Payment Form or Checkout Button */}
-            {!showPayment ? (
-              <>
-                <button 
-                  className="checkout-btn"
-                  onClick={() => setShowPayment(true)}
-                >
-                  Proceed to Payment
-                </button>
-
-                <button className="continue-shopping-btn" onClick={() => navigate('/gallery-shop')}>
-                  Continue Shopping
-                </button>
-              </>
-            ) : (
-              <div className="payment-container">
-                {paymentError && (
-                  <div className="payment-error">
-                    ❌ {paymentError}
-                  </div>
-                )}
-                
-                <SquarePayment
-                  amount={Math.round(calculateTotal() * 100)} // Convert to cents
-                  items = {validCart}
-                  onPaymentSuccess={handlePaymentSuccess}
-                  onPaymentError={handlePaymentError}
-                />
-
-                <button 
-                  className="back-to-cart-btn"
-                  onClick={() => setShowPayment(false)}
-                >
-                  ← Back to Cart
-                </button>
-              </div>
-            )}
+            <button className="continue-shopping-btn" onClick={() => navigate('/gallery-shop')}>
+              Continue Shopping
+            </button>
 
             {user ? (
               <p className="user-info">Logged in as {user.email}</p>
             ) : (
               <p className="login-prompt">
-                <a href="/login">Log in</a> to save your cart
+                <a href="/login">Log in</a> for faster checkout
               </p>
             )}
           </div>
