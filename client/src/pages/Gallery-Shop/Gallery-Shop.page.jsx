@@ -1,81 +1,110 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import assignDynamicIds from '../../utilities/assignDynamicIds';
 import './Gallery-Shop.css';
+import { Bold, Weight } from 'lucide-react';
 
 // Mock data for gallery items
-const GALLERY_DATA = {
+const RAW_GALLERY_DATA = {
   'available-order': {
     'lazy-susans': [
-      { id: 1, name: 'Acacia Lazy Susan 14"', price: 85, image: '/images/gallery/lazy1.jpg' },
-      { id: 2, name: 'Walnut Lazy Susan 16"', price: 120, image: '/images/gallery/lazy2.jpg' },
-      { id: 3, name: 'Cherry Lazy Susan 20"', price: 150, image: '/images/gallery/lazy3.jpg' },
+      { name: 'Acacia Lazy Susan 9"', price: 50, image: '/images/gallery/lazy1.jpg' },
+      { name: 'Acacia Lazy Susan 11"', price: 120, image: '/images/gallery/lazy2.jpg' },
+      { name: 'Acacia Lazy Susan 12"', price: 150, image: '/images/gallery/lazy3.jpg' },
+      { name: 'Lazy Susan 14"', price: 120, image: '/images/gallery/lazy2.jpg' },
+      { name: 'Lazy Susan 15"', price: 150, image: '/images/gallery/lazy3.jpg' },
+      { name: ' Lazy Susan 20"', price: 120, image: '/images/gallery/lazy2.jpg' },
+      
     ],
     'cutting-boards': [
-      { id: 4, name: 'Maple Cutting Board', price: 65, image: '/images/gallery/board1.jpg' },
-      { id: 5, name: 'Walnut End Grain Board', price: 95, image: '/images/gallery/board2.jpg' },
-      { id: 6, name: 'Cherry Charcuterie Board', price: 75, image: '/images/gallery/board3.jpg' },
+      { name: 'Black Walnut 11" x 8 " ', price: 65, image: '/images/gallery/board1.jpg' },
+      { name: 'Black Walnut 14" x 8"', price: 95, image: '/images/gallery/board2.jpg' },
+      { name: 'Black Walnut 19" x 10" ', price: 75, image: '/images/gallery/board3.jpg' },
+      { name: 'Black Walnut 24" x 12"', price: 95, image: '/images/gallery/board2.jpg' },
+      { name: 'Black Walnut 32" x 8.5" ', price: 75, image: '/images/gallery/board3.jpg' },
+      { name: 'Maple Walnut 11" x 8 " ', price: 65, image: '/images/gallery/board1.jpg' },
+      { name: 'Maple Walnut 14" x 8"', price: 95, image: '/images/gallery/board2.jpg' },
+      { name: 'Maple Walnut 19" x 10" ', price: 75, image: '/images/gallery/board3.jpg' },
+      { name: 'Maple Walnut 24" x 12"', price: 95, image: '/images/gallery/board2.jpg' },
+      { name: 'Maple Walnut 32" x 8.5" ', price: 75, image: '/images/gallery/board3.jpg' },
     ],
     'tables': [
-      { id: 7, name: 'Coffee Table', price: 450, image: '/images/gallery/table1.jpg' },
-      { id: 8, name: 'Side Table', price: 280, image: '/images/gallery/table2.jpg' },
+      { name: 'Coffee Table', price: 450, image: '/images/gallery/table1.jpg' },
+      { name: 'Side Table', price: 280, image: '/images/gallery/table2.jpg' },
     ],
     'trays': [
-      { id: 9, name: 'Serving Tray Large', price: 55, image: '/images/gallery/tray1.jpg' },
-      { id: 10, name: 'Breakfast Tray', price: 45, image: '/images/gallery/tray2.jpg' },
+      { name: 'Serving Tray Large', price: 55, image: '/images/gallery/tray1.jpg' },
+      { name: 'Breakfast Tray', price: 45, image: '/images/gallery/tray2.jpg' },
     ],
     'river-boards': [
-      { id: 11, name: 'Blue River Board', price: 180, image: '/images/gallery/river1.jpg' },
-      { id: 12, name: 'Green Wave Board', price: 165, image: '/images/gallery/river2.jpg' },
+      { name: 'Blue River Board', price: 180, image: '/images/gallery/river1.jpg' },
+      { name: 'Green Wave Board', price: 165, image: '/images/gallery/river2.jpg' },
     ],
     'river-tables': [
-      { id: 13, name: 'Ocean River Table', price: 1200, image: '/images/gallery/IMG_1692.jpg' },
-      { id: 14, name: 'Lake River Table', price: 950, image: '/images/gallery/rivertable2.jpg' },
+      { name: 'Ocean River Table', price: 1200, image: '/images/gallery/IMG_1692.jpg' },
+      { name: 'Lake River Table', price: 950, image: '/images/gallery/rivertable2.jpg' },
     ],
     'skulls': [
-      { id: 15, name: 'Carved Skull Decoration', price: 85, image: '/images/gallery/skull1.jpg' },
-      { id: 16, name: 'Resin Skull Art', price: 110, image: '/images/gallery/skull2.jpg' },
+      { name: 'Xtra Large Epoxy Skull', price: 20, image: '/images/gallery/skull1.jpg' },
+      { name: 'Large Epoxy Skull ', price: 110, image: '/images/gallery/skull2.jpg' },
+      { name: 'Medium Epoxy Skull', price: 85, image: '/images/gallery/skull1.jpg' },
+      { name: 'Small Epoxy Skull', price: 110, image: '/images/gallery/skull2.jpg' },
     ],
     'animals': [
-      { id: 17, name: 'Bear Carving', price: 95, image: '/images/gallery/animal1.jpg' },
-      { id: 18, name: 'Eagle Wall Art', price: 135, image: '/images/gallery/animal2.jpg' },
+      { name: 'Large Epoxy Cat', price: 95, image: '/images/gallery/animal1.jpg' },
+      { name: 'Medium Epoxy Cat', price: 135, image: '/images/gallery/animal2.jpg' },
+      { name: 'Small Epoxy Cat', price: 135, image: '/images/gallery/animal2.jpg' },
+      { name: 'Large Epoxy Dog', price: 95, image: '/images/gallery/animal1.jpg' },
+      { name: 'Medium Epoxy Dog', price: 135, image: '/images/gallery/animal2.jpg' },
+      { name: 'Small Epoxy Dog', price: 135, image: '/images/gallery/animal2.jpg' },
     ],
-    'other': [
-      { id: 19, name: 'Custom Coaster Set', price: 40, image: '/images/gallery/other1.jpg' },
-      { id: 20, name: 'Wine Rack', price: 120, image: '/images/gallery/other2.jpg' },
+    'Coasters': [
+      { name: 'Round Wave Coaster', price: 40, image: '/images/gallery/other1.jpg' },
+      { name: 'Hexagon Wave Coaster', price: 120, image: '/images/gallery/other2.jpg' },
+      { name: 'Square Fence Coaster', price: 40, image: '/images/gallery/other1.jpg' },
+      
     ],
+    'Bathroom Set': [
+      { name: 'Custom Coaster Set', price: 40, image: '/images/gallery/other1.jpg' },
+      { name: 'Wine Rack', price: 120, image: '/images/gallery/other2.jpg' },
+      { name: 'Wine Rack', price: 120, image: '/images/gallery/other2.jpg' },
+    ],
+    
   },
   'for-sale': {
     'lazy-susans': [
-      { id: 21, name: 'Acacia Lazy Susan 12"', price: 75, image: '/images/gallery/lazy4.jpg' },
-      { id: 22, name: 'Maple Lazy Susan 14"', price: 90, image: '/images/gallery/lazy5.jpg' },
+      { name: 'Acacia Lazy Susan 12"', price: 75, image: '/images/gallery/lazy4.jpg' },
+      { name: 'Maple Lazy Susan 14"', price: 90, image: '/images/gallery/lazy5.jpg' },
     ],
     'cutting-boards': [
-      { id: 23, name: 'Walnut Cutting Board', price: 55, image: '/images/gallery/board4.jpg' },
-      { id: 24, name: 'Acacia Board with Handle', price: 70, image: '/images/gallery/board5.jpg' },
+      { name: 'Walnut Cutting Board', price: 55, image: '/images/gallery/board4.jpg' },
+      { name: 'Acacia Board with Handle', price: 70, image: '/images/gallery/board5.jpg' },
     ],
     'tables': [
-      { id: 25, name: 'Dining Table', price: 850, image: '/images/gallery/table3.jpg' },
+      { name: 'Dining Table', price: 850, image: '/images/gallery/table3.jpg' },
     ],
     'trays': [
-      { id: 26, name: 'Decorative Tray', price: 48, image: '/images/gallery/tray3.jpg' },
+      { name: 'Decorative Tray', price: 48, image: '/images/gallery/tray3.jpg' },
     ],
     'river-boards': [
-      { id: 27, name: 'Turquoise River Board', price: 175, image: '/images/gallery/river3.jpg' },
+      { name: 'Turquoise River Board', price: 175, image: '/images/gallery/river3.jpg' },
     ],
     'river-tables': [
-      { id: 28, name: 'Sky River Table', price: 1100, image: '/images/gallery/rivertable3.jpg' },
+      { name: 'Sky River Table', price: 1100, image: '/images/gallery/rivertable3.jpg' },
     ],
     'skulls': [
-      { id: 29, name: 'Wooden Skull', price: 90, image: '/images/gallery/skull3.jpg' },
+      { name: 'Wooden Skull', price: 90, image: '/images/gallery/skull3.jpg' },
     ],
     'animals': [
-      { id: 30, name: 'Wolf Carving', price: 105, image: '/images/gallery/animal3.jpg' },
+      { name: 'Wolf Carving', price: 105, image: '/images/gallery/animal3.jpg' },
     ],
     'other': [
-      { id: 31, name: 'Jewelry Box', price: 65, image: '/images/gallery/other3.jpg' },
+      { name: 'Jewelry Box', price: 65, image: '/images/gallery/other3.jpg' },
     ],
   },
 };
+
+const GALLERY_DATA = assignDynamicIds(RAW_GALLERY_DATA);
 
 const CATEGORIES = [
   { id: 'lazy-susans', name: 'Lazy Susans', icon: '🌀' },
@@ -86,7 +115,7 @@ const CATEGORIES = [
   { id: 'river-tables', name: 'River Tables', icon: '💧' },
   { id: 'skulls', name: 'Skulls', icon: '💀' },
   { id: 'animals', name: 'Animals', icon: '🦅' },
-  { id: 'other', name: 'Other', icon: '✨' },
+  { id: 'holidays', name: 'Holidays', icon: '✨' },
 ];
 
 function GalleryShop({ addToCart }) {
@@ -155,7 +184,8 @@ function GalleryShop({ addToCart }) {
     <div className="gallery-page">
       <div className="gallery-header">
         <h1>Our Gallery</h1>
-        <p>Browse our collection of handcrafted woodwork</p>
+        <p>Browse our collection of handcrafted woodwork</p> <br/> Click Available By Order <br/> Or <br/> 
+        Available Items For Sale
       </div>
 
       {/* Section Toggle */}

@@ -149,8 +149,8 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
       html: emailContent,
     });
 
-    console.log('✅ Order notification email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    console.log('✅ Order notification email sent:', info.id);
+    return { success: true, messageId: info.id };
 
   } catch (error) {
     console.error('❌ Error sending email:', error);
@@ -273,7 +273,7 @@ app.post('/api/process-payment', async (req, res) => {
 app.post('/api/test-email', async (req, res) => {
   try {
     const info = await resend.emails.send({
-      from: `"Test Sender" <${process.env.EMAIL_USER}>`,
+      from: `onboarding@resend.dev`,
       to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
       subject: 'Test Email from 4EverLilys Server',
       text: 'This is a plain text test email.',

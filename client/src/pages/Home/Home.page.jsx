@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
@@ -16,9 +17,15 @@ function Home() {
             Choose from a variety of beautiful wooden crafts, select your 
             preferred size and colors, and we'll handcraft it just for you.
           </p>
-          <Link to="/build-custom" className="cta-button">
-            Build Your Custom Woodcrafted Gift
-          </Link>
+          <div className="cta-buttons-container">
+            <Link to="/gallery-shop" className="cta-button cta-primary">
+              🛍️ Shop Ready-Made Crafts
+            </Link>
+            <div className="cta-divider">or</div>
+            <Link to="/build-custom" className="cta-button cta-secondary">
+              🎨 Build Your Custom Gift
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -27,7 +34,7 @@ function Home() {
           <div className="feature-card">
             <div className="feature-icon">🪚</div>
             <h3>Custom Designs</h3>
-            <p>Choose from multiple gift options and customize every detail</p>
+            <p>Choose from multiple gift options and customizations</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">📏</div>
