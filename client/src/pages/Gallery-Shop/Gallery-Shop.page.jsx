@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import assignDynamicIds from '../../utilities/assignDynamicIds';
 import './Gallery-Shop.css';
-import { Bold, Weight } from 'lucide-react';
+
 
 // Mock data for gallery items
 const RAW_GALLERY_DATA = {
