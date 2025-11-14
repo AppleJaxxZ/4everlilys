@@ -119,6 +119,39 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
                 </button>
               </div>
             ))}
+
+            {/* Shipping & Policy Info Cards - Option 6 Style */}
+            <div className="policy-info-section">
+              <div className="badge-info-card shipping-badge">
+                <div className="badge-card-header">
+                  <div className="badge-icon-circle">🚚</div>
+                  <div className="badge-title-group">
+                    <h3>Shipping Timeline</h3>
+                    <p className="badge-subtitle">When to expect your order</p>
+                  </div>
+                </div>
+                <div className="badge-card-content">
+                  <p><strong>Custom Items:</strong> 2-4 weeks for crafting</p>
+                  <p><strong>Ready-Made:</strong> Ships in 3-5 business days</p>
+                  <p><strong>Delivery:</strong> 5-7 business days via standard shipping</p>
+                  <p className="info-note">📍 Tracking information provided with all orders</p>
+                </div>
+              </div>
+
+              <div className="badge-info-card refund-badge">
+                <div className="badge-card-header">
+                  <div className="badge-icon-circle refund-icon">✓</div>
+                  <div className="badge-title-group">
+                    <h3>Quality Guarantee</h3>
+                    <p className="badge-subtitle">24 hour refund policy</p>
+                  </div>
+                </div>
+                <div className="badge-card-content">
+                  <p><strong>24 hour refund policy:</strong> All sales are final.  You have 24 hours to cancel your order from the date and time of payment. </p>
+                  <p className="info-note">⚠️ ALL items are non-refundable unless the order is canceled within 24 hours.  To Cancel your order please email us @ <a href="4everlilyswc@gmail.com">Email Me</a></p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Cart Summary */}

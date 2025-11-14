@@ -130,6 +130,9 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
             <p>Tax (6%): $${tax.toFixed(2)}</p>
             <p><strong>Total Paid: $${total}</strong></p>
           </div>
+
+          <h3>RETURN POLICY</h3>
+          <p>All sales are final.  There are no refunds on any items from 4Everlilys unless your order is canceled within 24 hours.
           <div class="footer">
             <p>Order received on ${formattedDate}</p>
             <p>4EverLilys Wood Crafts</p>

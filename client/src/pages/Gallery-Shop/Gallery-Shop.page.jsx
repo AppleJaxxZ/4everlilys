@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import assignDynamicIds from '../../utilities/assignDynamicIds';
 import './Gallery-Shop.css';
-
+import { Bold, Weight } from 'lucide-react';
 
 // Mock data for gallery items
 const RAW_GALLERY_DATA = {
@@ -182,6 +182,16 @@ function GalleryShop({ addToCart }) {
 
   return (
     <div className="gallery-page">
+      {/* Persistent Banner Indicator */}
+      <div className={`banner-indicator ${activeSection === 'available-order' ? 'banner-order' : 'banner-sale'}`}>
+        <span className="banner-icon">
+          {activeSection === 'available-order' ? '📦' : '🛒'}
+        </span>
+        <span className="banner-text">
+          You are browsing: {activeSection === 'available-order' ? 'Available by Order' : 'Available Items For Sale'}
+        </span>
+      </div>
+
       <div className="gallery-header">
         <h1>Our Gallery</h1>
         <p>Browse our collection of handcrafted woodwork</p> <br/> Click Available By Order <br/> Or <br/> 
