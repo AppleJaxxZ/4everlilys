@@ -117,6 +117,39 @@ function Payment({ cart, user, removeFromCart }) {
               </button>
             </div>
 
+            {/* Shipping & Policy Info Cards - Option 6 Style */}
+            <div className="policy-info-section">
+              <div className="badge-info-card shipping-badge">
+                <div className="badge-card-header">
+                  <div className="badge-icon-circle">🚚</div>
+                  <div className="badge-title-group">
+                    <h3>Shipping Timeline</h3>
+                    <p className="badge-subtitle">When to expect your order</p>
+                  </div>
+                </div>
+                <div className="badge-card-content">
+                  <p><strong>Custom Items:</strong> 2-4 weeks for crafting</p>
+                  <p><strong>Ready-Made:</strong> Ships in 3-5 business days</p>
+                  <p><strong>Delivery:</strong> 5-7 business days via standard shipping</p>
+                  <p className="info-note">📍 Tracking information provided with all orders</p>
+                </div>
+              </div>
+
+              <div className="badge-info-card refund-badge">
+                <div className="badge-card-header">
+                  <div className="badge-icon-circle refund-icon">✓</div>
+                  <div className="badge-title-group">
+                    <h3>Quality Guarantee</h3>
+                    <p className="badge-subtitle">30-day refund policy</p>
+                  </div>
+                </div>
+                <div className="badge-card-content">
+                  <p><strong>30-Day Money-Back Guarantee:</strong> Not satisfied? Return your non-custom item within 30 days for a full refund.</p>
+                  <p className="info-note">⚠️ Custom/personalized items are non-refundable. Items must be unused and in original packaging.</p>
+                </div>
+              </div>
+            </div>
+
             {/* Payment Form */}
             <div className="payment-form-container">
               <h3>Payment Method</h3>

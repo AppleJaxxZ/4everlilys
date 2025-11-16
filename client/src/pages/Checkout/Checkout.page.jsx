@@ -6,6 +6,11 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
   const navigate = useNavigate();
 
   const validCart = cart.filter(item => item && item.id && item.name);
+  console.log('🛒 CHECKOUT - Cart items:', validCart);
+console.log('🛒 CHECKOUT - First item:', validCart[0]);
+console.log('🛒 Has gift?', !!validCart[0]?.gift);
+console.log('🛒 Has size?', !!validCart[0]?.size);
+console.log('🛒 Has wood?', !!validCart[0]?.wood);
 
   const calculateTotal = () => {
     return validCart.reduce((total, item) => {
@@ -118,6 +123,8 @@ function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
                   🗑️
                 </button>
               </div>
+
+              
             ))}
 
             {/* Shipping & Policy Info Cards - Option 6 Style */}
