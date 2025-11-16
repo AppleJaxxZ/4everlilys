@@ -216,16 +216,14 @@ async function createCatalogItemWithImage(item) {
 }
 
 //
-// Main payment route - FIXED WITH LINE ITEMS
+// Main payment route
 //
 app.post('/api/process-payment', async (req, res) => {
   const { sourceId, items, shippingInfo } = req.body;
 
   console.log('📥 BACKEND - Received items:', items);
   console.log('📥 BACKEND - First item:', items[0]);
-  console.log('📥 Has gift?', !!items[0]?.gift);
   
-
   if (!sourceId || !items) {
     return res.status(400).json({ success: false, message: 'Missing payment data.' });
   }
@@ -237,68 +235,61 @@ app.post('/api/process-payment', async (req, res) => {
     const total = subtotal + tax;
     const amountInCents = Number(Math.round(total * 100));
 
-    // ✅ NEW: Format line items for Square
-    // ✅ UPDATED: Handle BOTH Gallery Shop and Custom Builder items
-const lineItems = items.map(item => {
-  let noteDetails;
-  console.log('📦 Line items being sent:', JSON.stringify(lineItems, null, 2));
-  
-  // Check if it's a Custom Builder item (has gift/size/wood)
-  if (item.gift || item.size || item.wood) {
-    noteDetails = [
-      item.gift?.name && `Type: ${item.gift.name}`,
-      item.size?.name && `Size: ${item.size.name}`,
-      item.wood?.name && `Wood: ${item.wood.name}`,
-      item.handle?.name && `Handle: ${item.handle.name}`,
-      item.handleType?.name && `Handle Type: ${item.handleType.name}`,
-      item.designs?.length && `Design: ${item.designs.map(d => d.name).join(', ')}`,
-    ].filter(Boolean).join(' | ');
-  } 
-  // Otherwise it's a Gallery Shop item (has category/description)
-  else {
-    noteDetails = [
-      item.category && `Category: ${item.category}`,
-      item.type && `Type: ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}`,
-      item.description && `Description: ${item.description}`,
-    ].filter(Boolean).join(' | ');
-  }
+    // ✅ FIXED: Format line items for Square - handle BOTH types
+    const lineItems = items.map(item => {
+      let noteDetails = '';
+      
+      // Check if it's a Custom Builder item (has gift/size/wood)
+      if (item.gift || item.size || item.wood) {
+        const customDetails = [
+          item.gift?.name && `Type: ${item.gift.name}`,
+          item.size?.name && `Size: ${item.size.name}`,
+          item.wood?.name && `Wood: ${item.wood.name}`,
+          item.handle?.name && `Handle: ${item.handle.name}`,
+          item.handleType?.name && `Handle Type: ${item.handleType.name}`,
+          item.designs?.length && `Design: ${item.designs.map(d => d.name).join(', ')}`,
+        ].filter(Boolean);
+        noteDetails = customDetails.join(' | ');
+      } 
+      // Otherwise it's a Gallery Shop item (has category/description)
+      else {
+        const galleryDetails = [
+          item.category && `Category: ${item.category}`,
+          item.type && `Type: ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}`,
+          item.description && `${item.description}`,
+        ].filter(Boolean);
+        noteDetails = galleryDetails.join(' | ');
+      }
 
-  return {
-    name: item.name,
-    quantity: String(item.quantity || 1),
-    basePriceMoney: {
-      amount: Math.round((item.totalPrice || item.price) * 100),
-      currency: 'USD'
-    },
-    note: noteDetails || undefined,
-  };
-});
+      return {
+        name: item.name,
+        quantity: String(item.quantity || 1),
+        basePriceMoney: {
+          amount: Math.round((item.totalPrice || item.price) * 100),
+          currency: 'USD'
+        },
+        note: noteDetails || undefined,
+      };
+    });
 
-    console.log('📦 Sending line items to Square:', lineItems);
+    console.log('📦 Sending line items to Square:', JSON.stringify(lineItems, null, 2));
 
-    // ✅ FIXED: Create payment WITH line items
+    // Create payment WITH line items
     const paymentResponse = await client.paymentsApi.createPayment({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       locationId: process.env.SQUARE_LOCATION_ID,
-      amountMoney: { amount: Number(amountInCents), currency: 'USD' },
-      lineItems: lineItems, // ← THIS IS THE FIX!
+      amountMoney: { amount: amountInCents, currency: 'USD' },
+      lineItems: lineItems,
     });
 
     const payment = paymentResponse.result.payment;
     console.log('✅ Payment created with line items:', payment.id);
-    console.log('📧 Email Payload:', {
-      paymentId: payment.id,
-      amount: Number(amountInCents),
-      items,
-      shippingInfo,
-      orderDate: new Date().toISOString()
-    });
 
     // Send order email
     const emailResult = await sendOrderNotificationEmail({
       paymentId: payment.id,
-      amount: Number(amountInCents),
+      amount: amountInCents,
       items,
       shippingInfo,
       orderDate: new Date().toISOString()
