@@ -194,8 +194,9 @@ function GalleryShop({ addToCart }) {
 
       <div className="gallery-header">
         <h1>Our Gallery</h1>
-        <p>Browse our collection of handcrafted woodwork</p> <br/> Click Available By Order <br/> Or <br/> 
-        Available Items For Sale
+        <p>Browse our collection of handcrafted woodwork </p> <br/> Click Available By Order: <br/> 
+        The item is not yet made but will be ordered and added to a que of items to be built<br/> ____________ <br/> <br/>
+        Available Items For Sale: <br/> Items are already made and will be shipped to you as the image shows
       </div>
 
       {/* Section Toggle */}
