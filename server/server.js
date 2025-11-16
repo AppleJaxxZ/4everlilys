@@ -222,24 +222,23 @@ app.post('/api/process-payment', async (req, res) => {
   const { sourceId, items, shippingInfo } = req.body;
 
   console.log('📥 BACKEND - Received items:', items);
-  console.log('📥 BACKEND - First item:', items[0]);
   
   if (!sourceId || !items) {
     return res.status(400).json({ success: false, message: 'Missing payment data.' });
   }
 
   try {
-    // Calculate total
+    // Calculate totals
     const subtotal = items.reduce((sum, item) => sum + ((item.totalPrice || item.price) * item.quantity), 0);
     const tax = subtotal * 0.06;
     const total = subtotal + tax;
     const amountInCents = Number(Math.round(total * 100));
 
-    // ✅ FIXED: Format line items for Square - handle BOTH types
+    // ✅ STEP 1: Format line items for Square ORDER
     const lineItems = items.map(item => {
       let noteDetails = '';
       
-      // Check if it's a Custom Builder item (has gift/size/wood)
+      // Check if it's a Custom Builder item
       if (item.gift || item.size || item.wood) {
         const customDetails = [
           item.gift?.name && `Type: ${item.gift.name}`,
@@ -251,7 +250,7 @@ app.post('/api/process-payment', async (req, res) => {
         ].filter(Boolean);
         noteDetails = customDetails.join(' | ');
       } 
-      // Otherwise it's a Gallery Shop item (has category/description)
+      // Gallery Shop item
       else {
         const galleryDetails = [
           item.category && `Category: ${item.category}`,
@@ -272,24 +271,44 @@ app.post('/api/process-payment', async (req, res) => {
       };
     });
 
-    console.log('📦 Sending line items to Square:', JSON.stringify(lineItems, null, 2));
+    console.log('📦 Creating order with line items:', JSON.stringify(lineItems, null, 2));
 
-    // Create payment WITH line items
+    // ✅ STEP 2: Create ORDER first
+    const orderResponse = await client.ordersApi.createOrder({
+      order: {
+        locationId: process.env.SQUARE_LOCATION_ID,
+        lineItems: lineItems,
+        taxes: [{
+          name: 'Sales Tax',
+          percentage: '6.0',
+          scope: 'ORDER'
+        }]
+      },
+      idempotencyKey: crypto.randomUUID()
+    });
+
+    const order = orderResponse.result.order;
+    console.log('✅ Order created:', order.id);
+
+    // ✅ STEP 3: Create PAYMENT linked to the order
     const paymentResponse = await client.paymentsApi.createPayment({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       locationId: process.env.SQUARE_LOCATION_ID,
-      amountMoney: { amount: amountInCents, currency: 'USD' },
-      lineItems: lineItems,
+      amountMoney: { 
+        amount: Number(order.totalMoney.amount), // Use order total
+        currency: 'USD' 
+      },
+      orderId: order.id, // ← Link to the order!
     });
 
     const payment = paymentResponse.result.payment;
-    console.log('✅ Payment created with line items:', payment.id);
+    console.log('✅ Payment created and linked to order:', payment.id);
 
     // Send order email
     const emailResult = await sendOrderNotificationEmail({
       paymentId: payment.id,
-      amount: amountInCents,
+      amount: Number(order.totalMoney.amount),
       items,
       shippingInfo,
       orderDate: new Date().toISOString()
