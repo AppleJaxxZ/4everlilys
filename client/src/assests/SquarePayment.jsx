@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk';
 import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner.component';
 
@@ -16,7 +16,6 @@ function SquarePayment({
   // Function to prepare items with images for payment
   const prepareItemsForPayment = (items) => {
     return items.map(item => {
-      // Create a clean item object for payment
       const paymentItem = {
         id: item.id,
         name: item.name,
@@ -28,7 +27,6 @@ function SquarePayment({
         isCustom: item.isCustom || false,
       };
 
-      // Add custom configuration if present
       if (item.gift) paymentItem.gift = item.gift;
       if (item.size) paymentItem.size = item.size;
       if (item.wood) paymentItem.wood = item.wood;
@@ -36,14 +34,11 @@ function SquarePayment({
       if (item.handleType) paymentItem.handleType = item.handleType;
       if (item.designs) paymentItem.designs = item.designs;
 
-      // Include image data if present (limit size for transmission)
       if (item.imageData) {
-        // If image is too large, you might want to compress it
-        const maxImageSize = 500000; // 500KB limit
+        const maxImageSize = 500000;
         if (item.imageData.length < maxImageSize) {
           paymentItem.imageData = item.imageData;
         } else {
-          // Optionally compress or just use URL
           console.warn('Image too large, using URL instead');
           paymentItem.imageUrl = item.imageUrl || item.image;
         }
@@ -55,10 +50,9 @@ function SquarePayment({
     });
   };
 
-  // Get final billing address (either separate or same as shipping)
-  const getFinalBillingInfo = () => {
+  // ✅ FIX: Use useCallback to memoize the function
+  const getFinalBillingInfo = useCallback(() => {
     if (billingSameAsShipping || !billingInfo) {
-      // Use shipping address as billing
       return {
         address: shippingInfo?.address || '',
         city: shippingInfo?.city || '',
@@ -67,16 +61,14 @@ function SquarePayment({
         country: 'US'
       };
     } else {
-      // Use separate billing address
       return billingInfo;
     }
-  };
+  }, [billingSameAsShipping, billingInfo, shippingInfo]);
 
   // Check if we have required info
   React.useEffect(() => {
     if (!shippingInfo) {
       console.warn('⚠️ No shipping info provided to SquarePayment component');
-      // Try to get from sessionStorage as backup
       const savedShipping = sessionStorage.getItem('shippingInfo');
       if (savedShipping) {
         console.log('✅ Found shipping info in sessionStorage');
@@ -89,7 +81,7 @@ function SquarePayment({
     } else {
       console.log('✅ Billing address ready for AVS verification');
     }
-  }, [shippingInfo, billingInfo, billingSameAsShipping]);
+  }, [shippingInfo, billingInfo, billingSameAsShipping, getFinalBillingInfo]); // ✅ Now it's safe to include
 
   return (
     <PaymentForm
@@ -98,12 +90,10 @@ function SquarePayment({
       cardTokenizeResponseReceived={async (token, verifiedBuyer) => {
         setLoading(true);
         try {
-          // Prepare items with images
           const preparedItems = prepareItemsForPayment(items);
           const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
           console.log("🌐 Backend URL:", backendUrl);
 
-          // Get shipping info from props or sessionStorage
           let finalShippingInfo = shippingInfo;
           if (!finalShippingInfo) {
             const savedShipping = sessionStorage.getItem('shippingInfo');
@@ -112,7 +102,6 @@ function SquarePayment({
             }
           }
 
-          // Get billing info (either separate or same as shipping)
           const finalBillingInfo = getFinalBillingInfo();
 
           console.log('💳 Processing payment with:');
@@ -120,7 +109,6 @@ function SquarePayment({
           console.log('  - Billing address:', finalBillingInfo);
           console.log('  - Items:', preparedItems.length);
 
-          // Call YOUR backend with ALL required info for AVS + 3D Secure
           const response = await fetch(`${backendUrl}/api/process-payment`, {
             method: 'POST',
             headers: {
@@ -128,10 +116,10 @@ function SquarePayment({
             },
             body: JSON.stringify({
               sourceId: token.token,
-              verificationToken: verifiedBuyer?.token, // 3D Secure token
+              verificationToken: verifiedBuyer?.token,
               items: preparedItems,
               shippingInfo: finalShippingInfo || {},
-              billingInfo: finalBillingInfo, // For AVS verification
+              billingInfo: finalBillingInfo,
             }),
           });
 
@@ -154,7 +142,6 @@ function SquarePayment({
         }
       }}
       createVerificationDetails={() => {
-        // Get shipping and billing info
         let finalShippingInfo = shippingInfo;
         if (!finalShippingInfo) {
           const savedShipping = sessionStorage.getItem('shippingInfo');
@@ -163,21 +150,16 @@ function SquarePayment({
           }
         }
 
-        // Get final billing address (respects billingSameAsShipping flag)
         const finalBillingInfo = getFinalBillingInfo();
       
-        // Validate we have required info
         if (!finalShippingInfo?.firstName || !finalBillingInfo?.address) {
           console.warn('⚠️ Missing required info for buyer verification');
         }
       
-        // Build verification details for 3D Secure + AVS
         const verificationDetails = {
-          amount: Number(amount / 100).toFixed(2), // Convert cents to dollars
+          amount: Number(amount / 100).toFixed(2),
           currencyCode: 'USD',
           intent: 'CHARGE',
-          
-          // Billing contact info (used for AVS and 3D Secure)
           billingContact: {
             addressLines: [finalBillingInfo?.address || ''],
             familyName: finalShippingInfo?.lastName || '',

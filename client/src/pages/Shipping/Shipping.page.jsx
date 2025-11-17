@@ -194,30 +194,47 @@ const handleBillingChange = (e) => {
   const handleContinueToPayment = async (e) => {
     e.preventDefault();
     
-    // Validate shipping form
-    if (!shippingData.firstName || !shippingData.lastName || !shippingData.email || 
-        !shippingData.phone || !shippingData.address || !shippingData.city || 
-        !shippingData.state || !shippingData.zipCode) {
-      alert('Please fill in all required shipping fields');
+    // ✅ USE validateForm instead of inline validation
+    if (!validateForm()) {
       return;
     }
-  
+    
     // Validate billing form if not same as shipping
     if (!billingSameAsShipping) {
       if (!billingInfo.address || !billingInfo.city || !billingInfo.state || !billingInfo.zipCode) {
-        alert('Please fill in all required billing fields');
+        setErrors(prev => ({
+          ...prev,
+          general: 'Please fill in all required billing fields'
+        }));
         return;
       }
     }
   
-    // Save both shipping and billing info
-    const saved = await saveShippingAndBillingInfo();
+    // ✅ USE setLoading to show loading state
+    setLoading(true);
     
-    if (saved) {
-      // Navigate to payment page
-      navigate('/payment');
-    } else {
-      alert('Failed to save checkout information. Please try again.');
+    try {
+      // Save both shipping and billing info
+      const saved = await saveShippingAndBillingInfo();
+      
+      if (saved) {
+        // Navigate to payment page
+        navigate('/payment');
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          general: 'Failed to save checkout information. Please try again.'
+        }));
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      setErrors(prev => ({
+        ...prev,
+        general: 'An error occurred. Please try again.'
+      }));
+    } finally {
+      // ✅ Always reset loading state
+      setLoading(false);
     }
   };
 
