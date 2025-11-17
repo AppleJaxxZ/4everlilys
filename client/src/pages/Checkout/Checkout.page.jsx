@@ -5,6 +5,8 @@ import './Checkout.css';
 function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
   const navigate = useNavigate();
 
+  
+
   const validCart = cart.filter(item => item && item.id && item.name);
   console.log('🛒 CHECKOUT - Cart items:', validCart);
 console.log('🛒 CHECKOUT - First item:', validCart[0]);

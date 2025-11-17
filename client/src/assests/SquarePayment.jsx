@@ -1,8 +1,16 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk';
 import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner.component';
 
-function SquarePayment({ amount, items, shippingInfo, onPaymentSuccess, onPaymentError }) {
+function SquarePayment({ 
+  amount, 
+  items, 
+  shippingInfo, 
+  billingInfo,
+  billingSameAsShipping,
+  onPaymentSuccess, 
+  onPaymentError 
+}) {
   const [loading, setLoading] = useState(false);
   
   // Function to prepare items with images for payment
@@ -47,17 +55,41 @@ function SquarePayment({ amount, items, shippingInfo, onPaymentSuccess, onPaymen
     });
   };
 
-  // Check if we have shipping info
+  // Get final billing address (either separate or same as shipping)
+  const getFinalBillingInfo = () => {
+    if (billingSameAsShipping || !billingInfo) {
+      // Use shipping address as billing
+      return {
+        address: shippingInfo?.address || '',
+        city: shippingInfo?.city || '',
+        state: shippingInfo?.state || '',
+        zipCode: shippingInfo?.zipCode || '',
+        country: 'US'
+      };
+    } else {
+      // Use separate billing address
+      return billingInfo;
+    }
+  };
+
+  // Check if we have required info
   React.useEffect(() => {
     if (!shippingInfo) {
-      console.warn('No shipping info provided to SquarePayment component');
+      console.warn('⚠️ No shipping info provided to SquarePayment component');
       // Try to get from sessionStorage as backup
       const savedShipping = sessionStorage.getItem('shippingInfo');
       if (savedShipping) {
-        console.log('Found shipping info in sessionStorage');
+        console.log('✅ Found shipping info in sessionStorage');
       }
     }
-  }, [shippingInfo]);
+    
+    const finalBilling = getFinalBillingInfo();
+    if (!finalBilling.address || !finalBilling.zipCode) {
+      console.warn('⚠️ Incomplete billing address - AVS verification may fail');
+    } else {
+      console.log('✅ Billing address ready for AVS verification');
+    }
+  }, [shippingInfo, billingInfo, billingSameAsShipping]);
 
   return (
     <PaymentForm
@@ -69,7 +101,7 @@ function SquarePayment({ amount, items, shippingInfo, onPaymentSuccess, onPaymen
           // Prepare items with images
           const preparedItems = prepareItemsForPayment(items);
           const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-          console.log("BackendUrl", backendUrl);
+          console.log("🌐 Backend URL:", backendUrl);
 
           // Get shipping info from props or sessionStorage
           let finalShippingInfo = shippingInfo;
@@ -80,7 +112,15 @@ function SquarePayment({ amount, items, shippingInfo, onPaymentSuccess, onPaymen
             }
           }
 
-          // Call YOUR backend (not Square directly) with shipping info
+          // Get billing info (either separate or same as shipping)
+          const finalBillingInfo = getFinalBillingInfo();
+
+          console.log('💳 Processing payment with:');
+          console.log('  - Verification token:', verifiedBuyer?.token ? 'Present ✅' : 'Missing ❌');
+          console.log('  - Billing address:', finalBillingInfo);
+          console.log('  - Items:', preparedItems.length);
+
+          // Call YOUR backend with ALL required info for AVS + 3D Secure
           const response = await fetch(`${backendUrl}/api/process-payment`, {
             method: 'POST',
             headers: {
@@ -88,60 +128,78 @@ function SquarePayment({ amount, items, shippingInfo, onPaymentSuccess, onPaymen
             },
             body: JSON.stringify({
               sourceId: token.token,
+              verificationToken: verifiedBuyer?.token, // 3D Secure token
               items: preparedItems,
-              shippingInfo: finalShippingInfo || {}, // Pass empty object if no shipping info
-              verifiedBuyer: verifiedBuyer,
+              shippingInfo: finalShippingInfo || {},
+              billingInfo: finalBillingInfo, // For AVS verification
             }),
           });
 
           const result = await response.json();
           
           if (result.success) {
+            console.log('✅ Payment successful');
+            console.log('🔒 AVS Status:', result.payment?.avsStatus);
+            console.log('🔒 CVV Status:', result.payment?.cvvStatus);
             onPaymentSuccess(result);
           } else {
+            console.error('❌ Payment failed:', result.error || result.message);
             onPaymentError(result.error || result.message);
           }
         } catch (error) {
-          console.error('Payment error:', error);
+          console.error('❌ Payment error:', error);
           onPaymentError(error.message);
         } finally {
           setLoading(false);
         }
       }}
       createVerificationDetails={() => {
-        let billingInfo = shippingInfo;
-        if (!billingInfo) {
+        // Get shipping and billing info
+        let finalShippingInfo = shippingInfo;
+        if (!finalShippingInfo) {
           const savedShipping = sessionStorage.getItem('shippingInfo');
           if (savedShipping) {
-            billingInfo = JSON.parse(savedShipping);
+            finalShippingInfo = JSON.parse(savedShipping);
           }
         }
+
+        // Get final billing address (respects billingSameAsShipping flag)
+        const finalBillingInfo = getFinalBillingInfo();
       
-        if (!billingInfo || !billingInfo.firstName || !billingInfo.address) {
-          console.warn('⚠️ Missing billing info — verification may fail.');
+        // Validate we have required info
+        if (!finalShippingInfo?.firstName || !finalBillingInfo?.address) {
+          console.warn('⚠️ Missing required info for buyer verification');
         }
       
+        // Build verification details for 3D Secure + AVS
         const verificationDetails = {
-          amount: Number(amount / 100).toString(),
+          amount: Number(amount / 100).toFixed(2), // Convert cents to dollars
           currencyCode: 'USD',
           intent: 'CHARGE',
+          
+          // Billing contact info (used for AVS and 3D Secure)
           billingContact: {
-            addressLines: [billingInfo?.address || ''],
-            familyName: billingInfo?.lastName || '',
-            givenName: billingInfo?.firstName || '',
-            email: billingInfo?.email || '',
-            phone: billingInfo?.phone || '',
-            city: billingInfo?.city || '',
-            state: billingInfo?.state || '',
-            postalCode: billingInfo?.zipCode || '',
-            countryCode: 'US',
+            addressLines: [finalBillingInfo?.address || ''],
+            familyName: finalShippingInfo?.lastName || '',
+            givenName: finalShippingInfo?.firstName || '',
+            email: finalShippingInfo?.email || '',
+            phone: finalShippingInfo?.phone || '',
+            city: finalBillingInfo?.city || '',
+            state: finalBillingInfo?.state || '',
+            postalCode: finalBillingInfo?.zipCode || '',
+            countryCode: finalBillingInfo?.country || 'US',
           },
         };
       
-        console.log('🔍 Verification Details:', verificationDetails);
+        console.log('🔐 Creating buyer verification with billing address:', {
+          address: finalBillingInfo?.address,
+          city: finalBillingInfo?.city,
+          state: finalBillingInfo?.state,
+          zip: finalBillingInfo?.zipCode,
+        });
+        
         return verificationDetails;
       }}
-      
     >
       <CreditCard />
       {loading && <LoadingSpinner />}

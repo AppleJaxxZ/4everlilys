@@ -23,6 +23,25 @@ function Shipping({ cart, user }) {
     saveInfo: false
   });
 
+
+  // ADD: Separate billing address state
+const [billingInfo, setBillingInfo] = useState({
+  address: '',
+  city: '',
+  state: '',
+  zipCode: '',
+  country: 'US',
+});
+
+// ADD: Toggle for "same as shipping"
+const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+
+// ADD: Handler for billing info
+const handleBillingChange = (e) => {
+  const { name, value } = e.target;
+  setBillingInfo(prev => ({ ...prev, [name]: value }));
+};
+
   useEffect(() => {
     // Redirect if cart is empty
     if (!cart || cart.length === 0) {
@@ -120,58 +139,86 @@ function Shipping({ cart, user }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const saveShippingInfo = async () => {
+  const saveShippingAndBillingInfo = async () => {
     try {
+      // Prepare billing data - use shipping if same, otherwise use separate billing
+      const finalBillingInfo = billingSameAsShipping 
+        ? {
+            address: shippingData.address,
+            city: shippingData.city,
+            state: shippingData.state,
+            zipCode: shippingData.zipCode,
+            country: 'US'
+          }
+        : billingInfo;
+  
+      const checkoutData = {
+        shipping: shippingData,
+        billing: finalBillingInfo,
+        billingSameAsShipping: billingSameAsShipping,
+        updatedAt: new Date().toISOString()
+      };
+  
       // Save to appropriate collection based on user status
       if (user) {
         // Save to user's profile
         const userRef = doc(db, 'users', user.uid);
-        await setDoc(userRef, {
-          ...shippingData,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
+        await setDoc(userRef, checkoutData, { merge: true });
+        console.log('✅ Saved to user profile:', user.uid);
       } else {
         // Save to temporary collection for guest users
         const guestId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const guestRef = doc(db, 'guestCheckouts', guestId);
         await setDoc(guestRef, {
-          ...shippingData,
+          ...checkoutData,
           createdAt: new Date().toISOString(),
           cart: cart
         });
         
         // Store guest ID in sessionStorage for payment page
         sessionStorage.setItem('guestCheckoutId', guestId);
+        console.log('✅ Saved guest checkout:', guestId);
       }
       
-      // Store shipping info in sessionStorage for immediate use
+      // Store shipping and billing info in sessionStorage for immediate use
       sessionStorage.setItem('shippingInfo', JSON.stringify(shippingData));
+      sessionStorage.setItem('billingInfo', JSON.stringify(finalBillingInfo));
+      sessionStorage.setItem('billingSameAsShipping', billingSameAsShipping.toString());
       
       return true;
     } catch (error) {
-      console.error('Error saving shipping info:', error);
+      console.error('❌ Error saving checkout info:', error);
       return false;
     }
   };
-
   const handleContinueToPayment = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    // Validate shipping form
+    if (!shippingData.firstName || !shippingData.lastName || !shippingData.email || 
+        !shippingData.phone || !shippingData.address || !shippingData.city || 
+        !shippingData.state || !shippingData.zipCode) {
+      alert('Please fill in all required shipping fields');
       return;
     }
-    
-    setLoading(true);
-    
-    const saved = await saveShippingInfo();
+  
+    // Validate billing form if not same as shipping
+    if (!billingSameAsShipping) {
+      if (!billingInfo.address || !billingInfo.city || !billingInfo.state || !billingInfo.zipCode) {
+        alert('Please fill in all required billing fields');
+        return;
+      }
+    }
+  
+    // Save both shipping and billing info
+    const saved = await saveShippingAndBillingInfo();
     
     if (saved) {
+      // Navigate to payment page
       navigate('/payment');
     } else {
-      setErrors({ general: 'Failed to save shipping information. Please try again.' });
+      alert('Failed to save checkout information. Please try again.');
     }
-    
-    setLoading(false);
   };
 
   const calculateTotal = () => {
@@ -418,6 +465,87 @@ function Shipping({ cart, user }) {
                   </select>
                 </div>
               </div>
+
+              {/* Billing Address Section */}
+<div className="billing-section">
+  <h2>Billing Address</h2>
+  
+  <label className="checkbox-label">
+    <input
+      type="checkbox"
+      checked={billingSameAsShipping}
+      onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+    />
+    Same as shipping address
+  </label>
+
+  {!billingSameAsShipping && (
+    <div className="billing-form">
+      <div className="form-group">
+        <label>Street Address *</label>
+        <input
+          type="text"
+          name="address"
+          value={billingInfo.address}
+          onChange={handleBillingChange}
+          required
+        />
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label>City *</label>
+          <input
+            type="text"
+            name="city"
+            value={billingInfo.city}
+            onChange={handleBillingChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>State *</label>
+          <input
+            type="text"
+            name="state"
+            value={billingInfo.state}
+            onChange={handleBillingChange}
+            placeholder="PA"
+            maxLength="2"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label>ZIP Code *</label>
+          <input
+            type="text"
+            name="zipCode"
+            value={billingInfo.zipCode}
+            onChange={handleBillingChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Country *</label>
+          <select
+            name="country"
+            value={billingInfo.country}
+            onChange={handleBillingChange}
+            required
+          >
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
               
               {user && (
                 <div className="save-info-checkbox">

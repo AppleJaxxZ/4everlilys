@@ -1,31 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import SquarePayment from '../../assests/SquarePayment';
 import './Payment.css';
 
 function Payment({ cart, user, removeFromCart }) {
   const navigate = useNavigate();
   const [shippingInfo, setShippingInfo] = useState(null);
+  const [billingInfo, setBillingInfo] = useState(null);
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-  // const [loading, setLoading] = useState(false);
   const [feeBreakdown, setFeeBreakdown] = useState(null);
 
+  // useEffect 1: Load from sessionStorage (runs first)
   useEffect(() => {
-    // Load shipping info from sessionStorage
     const savedShipping = sessionStorage.getItem('shippingInfo');
+    const savedBilling = sessionStorage.getItem('billingInfo');
+    const savedSameAsShipping = sessionStorage.getItem('billingSameAsShipping');
+    
     if (!savedShipping) {
       // Redirect to shipping if no info found
       navigate('/shipping');
       return;
     }
+    
+    // Load shipping info
     setShippingInfo(JSON.parse(savedShipping));
+    console.log('✅ Loaded shipping from sessionStorage');
+    
+    // Load billing info
+    if (savedBilling) {
+      setBillingInfo(JSON.parse(savedBilling));
+      console.log('✅ Loaded billing from sessionStorage');
+    }
+    
+    // Load billing preference
+    if (savedSameAsShipping) {
+      setBillingSameAsShipping(savedSameAsShipping === 'true');
+    }
 
     // Redirect if cart is empty
     if (!cart || cart.length === 0) {
       navigate('/checkout');
     }
   }, [cart, navigate]);
+
+  // useEffect 2: Load from Firebase for logged-in users (optional fallback)
+  useEffect(() => {
+    const loadSavedInfo = async () => {
+      if (user && !shippingInfo) {
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            
+            // Load shipping info if not already loaded
+            if (data.shipping && !shippingInfo) {
+              setShippingInfo(data.shipping);
+              console.log('✅ Loaded shipping from Firebase');
+            }
+            
+            // Load billing info if not already loaded
+            if (data.billing && !billingInfo) {
+              setBillingInfo(data.billing);
+              console.log('✅ Loaded billing from Firebase');
+            }
+            
+            // Load billing preference
+            if (data.billingSameAsShipping !== undefined) {
+              setBillingSameAsShipping(data.billingSameAsShipping);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading saved info from Firebase:', error);
+        }
+      }
+    };
+
+    loadSavedInfo();
+  }, [user, shippingInfo, billingInfo]);
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
@@ -46,6 +103,7 @@ function Payment({ cart, user, removeFromCart }) {
       payment: result.payment,
       items: cart,
       shippingInfo: shippingInfo,
+      billingInfo: billingInfo,
       orderId: result.orderId,
       breakdown: result.breakdown,
       rawResult: result,
@@ -54,8 +112,10 @@ function Payment({ cart, user, removeFromCart }) {
     // Clear cart
     cart.forEach(item => removeFromCart(item.id));
     
-    // Clear shipping info from session
+    // Clear checkout info from session
     sessionStorage.removeItem('shippingInfo');
+    sessionStorage.removeItem('billingInfo');
+    sessionStorage.removeItem('billingSameAsShipping');
     sessionStorage.removeItem('guestCheckoutId');
 
     // Redirect to confirmation
@@ -109,11 +169,24 @@ function Payment({ cart, user, removeFromCart }) {
                 <p>{shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}</p>
                 <p>{shippingInfo.country}</p>
               </div>
+              
+              {/* Show Billing Address if Different */}
+              {!billingSameAsShipping && billingInfo && (
+                <>
+                  <h3 style={{ marginTop: '20px' }}>Billing Address:</h3>
+                  <div className="address-info">
+                    <p>{billingInfo.address}</p>
+                    <p>{billingInfo.city}, {billingInfo.state} {billingInfo.zipCode}</p>
+                    <p>{billingInfo.country}</p>
+                  </div>
+                </>
+              )}
+              
               <button 
                 className="edit-shipping-btn"
                 onClick={() => navigate('/shipping')}
               >
-                Edit Shipping Info
+                Edit Shipping/Billing Info
               </button>
             </div>
 
@@ -164,7 +237,9 @@ function Payment({ cart, user, removeFromCart }) {
                 <SquarePayment
                   amount={Math.round(calculateTotal() * 100)}
                   items={cart}
-                  shippingInfo={shippingInfo} // Pass shipping info to payment
+                  shippingInfo={shippingInfo}
+                  billingInfo={billingInfo}
+                  billingSameAsShipping={billingSameAsShipping}
                   onPaymentSuccess={handlePaymentSuccess}
                   onPaymentError={handlePaymentError}
                 />
@@ -186,7 +261,7 @@ function Payment({ cart, user, removeFromCart }) {
                 <span className="lock-icon">🔒</span>
                 <p>Your payment information is secure and encrypted</p>
               </div>
-              <p className="powered-by">Powered by Square</p>
+              <p className="powered-by">Powered by Square • Secured with AVS & 3D Secure</p>
             </div>
           </div>
 

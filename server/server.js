@@ -219,11 +219,12 @@ async function createCatalogItemWithImage(item) {
 // Main payment route
 //
 app.post('/api/process-payment', async (req, res) => {
-  const { sourceId, items, shippingInfo } = req.body;
+  const { sourceId, verificationToken, items, shippingInfo, billingInfo } = req.body;
 
-  console.log('📥 BACKEND - Received items:', items);
+  console.log('📥 BACKEND - Received payment request');
+  console.log('🏠 Billing Address:', billingInfo);
   
-  if (!sourceId || !items) {
+  if (!sourceId || !items || !billingInfo) {
     return res.status(400).json({ success: false, message: 'Missing payment data.' });
   }
 
@@ -234,11 +235,10 @@ app.post('/api/process-payment', async (req, res) => {
     const total = subtotal + tax;
     const amountInCents = Number(Math.round(total * 100));
 
-    // ✅ STEP 1: Format line items for Square ORDER
+    // Format line items
     const lineItems = items.map(item => {
       let noteDetails = '';
       
-      // Check if it's a Custom Builder item
       if (item.gift || item.size || item.wood) {
         const customDetails = [
           item.gift?.name && `Type: ${item.gift.name}`,
@@ -249,9 +249,7 @@ app.post('/api/process-payment', async (req, res) => {
           item.designs?.length && `Design: ${item.designs.map(d => d.name).join(', ')}`,
         ].filter(Boolean);
         noteDetails = customDetails.join(' | ');
-      } 
-      // Gallery Shop item
-      else {
+      } else {
         const galleryDetails = [
           item.category && `Category: ${item.category}`,
           item.type && `Type: ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}`,
@@ -271,9 +269,7 @@ app.post('/api/process-payment', async (req, res) => {
       };
     });
 
-    console.log('📦 Creating order with line items:', JSON.stringify(lineItems, null, 2));
-
-    // ✅ STEP 2: Create ORDER first
+    // Create ORDER
     const orderResponse = await client.ordersApi.createOrder({
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
@@ -290,20 +286,51 @@ app.post('/api/process-payment', async (req, res) => {
     const order = orderResponse.result.order;
     console.log('✅ Order created:', order.id);
 
-    // ✅ STEP 3: Create PAYMENT linked to the order
+    // ✅ CREATE PAYMENT with billing address for AVS
     const paymentResponse = await client.paymentsApi.createPayment({
       sourceId,
       idempotencyKey: crypto.randomUUID(),
       locationId: process.env.SQUARE_LOCATION_ID,
       amountMoney: { 
-        amount: Number(order.totalMoney.amount), // Use order total
+        amount: Number(order.totalMoney.amount),
         currency: 'USD' 
       },
-      orderId: order.id, // ← Link to the order!
+      orderId: order.id,
+      
+      // ✅ ADD: Verification token for 3D Secure
+      verificationToken: verificationToken,
+      
+      // ✅ ADD: Billing address for AVS check
+      billingAddress: {
+        addressLine1: billingInfo.address,
+        locality: billingInfo.city,
+        administrativeDistrictLevel1: billingInfo.state,
+        postalCode: billingInfo.zipCode,
+        country: billingInfo.country || 'US'
+      },
+      
+      // ✅ ADD: Buyer email for verification
+      buyerEmailAddress: shippingInfo.email,
     });
 
     const payment = paymentResponse.result.payment;
-    console.log('✅ Payment created and linked to order:', payment.id);
+    
+    // ✅ CHECK AVS RESULTS
+    const cardDetails = payment.cardDetails;
+    console.log('🔒 AVS Check:', cardDetails?.avsStatus);
+    console.log('🔒 CVV Check:', cardDetails?.cvvStatus);
+    
+    // Optional: Reject if AVS fails
+    if (cardDetails?.avsStatus === 'AVS_REJECTED') {
+      console.warn('⚠️ AVS verification failed');
+      // You can choose to reject or flag for manual review
+      // return res.status(400).json({ 
+      //   success: false, 
+      //   message: 'Billing address verification failed' 
+      // });
+    }
+
+    console.log('✅ Payment created:', payment.id);
 
     // Send order email
     const emailResult = await sendOrderNotificationEmail({
@@ -324,6 +351,8 @@ app.post('/api/process-payment', async (req, res) => {
         createdAt: payment.createdAt,
         orderId: payment.orderId,
         receiptUrl: payment.receiptUrl,
+        avsStatus: cardDetails?.avsStatus, // Return AVS result
+        cvvStatus: cardDetails?.cvvStatus, // Return CVV result
       },
       email: emailResult,
     });
