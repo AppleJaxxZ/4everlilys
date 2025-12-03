@@ -41,6 +41,12 @@ console.log(process.env.NODE_ENV);
 //
 async function sendOrderNotificationEmail({ paymentId, amount, items, shippingInfo, orderDate }) {
   try {
+    // Check environment variables
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY is not set!');
+      return { success: false, error: 'Email service not configured - missing API key' };
+    }
+
     // --- 1. Fetch full payment details from Square ---
     const { result } = await client.paymentsApi.getPayment(paymentId);
     const payment = result.payment;
@@ -50,35 +56,34 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
     console.log('📧 Sending order email with:', shippingInfo);
 
     // --- 2. Format order items ---
-    // Format order items
-const itemsList = items.map(item => {
-  let details = `
-    <li style="margin-bottom:15px;padding:10px;background:#f5f5f5;border-radius:5px;">
-      <strong>${item.name}</strong><br>
-      Quantity: ${item.quantity}<br>
-      Price: $${(item.totalPrice || item.price).toFixed(2)} each<br>
-      Subtotal: $${((item.totalPrice || item.price) * item.quantity).toFixed(2)}<br>`;
-  
-  // Custom Builder items
-  if (item.gift || item.size || item.wood) {
-    details += `<br><strong>Custom Configuration:</strong><br>`;
-    if (item.gift?.name) details += `Type: ${item.gift.name}<br>`;
-    if (item.size?.name) details += `Size: ${item.size.name}<br>`;
-    if (item.wood?.name) details += `Wood: ${item.wood.name}<br>`;
-    if (item.handle?.name) details += `Handle: ${item.handle.name}<br>`;
-    if (item.handleType?.name) details += `Handle Type: ${item.handleType.name}<br>`;
-    if (item.designs?.[0]?.name) details += `Design: ${item.designs[0].name}<br>`;
-  } 
-  // Gallery Shop items
-  else {
-    if (item.category) details += `<br><strong>Category:</strong> ${item.category}<br>`;
-    if (item.type) details += `<strong>Type:</strong> ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}<br>`;
-    if (item.description) details += `<strong>Description:</strong> ${item.description}<br>`;
-  }
-  
-  details += `</li>`;
-  return details;
-}).join('');
+    const itemsList = items.map(item => {
+      let details = `
+        <li style="margin-bottom:15px;padding:10px;background:#f5f5f5;border-radius:5px;">
+          <strong>${item.name}</strong><br>
+          Quantity: ${item.quantity}<br>
+          Price: $${(item.totalPrice || item.price).toFixed(2)} each<br>
+          Subtotal: $${((item.totalPrice || item.price) * item.quantity).toFixed(2)}<br>`;
+      
+      // Custom Builder items
+      if (item.gift || item.size || item.wood) {
+        details += `<br><strong>Custom Configuration:</strong><br>`;
+        if (item.gift?.name) details += `Type: ${item.gift.name}<br>`;
+        if (item.size?.name) details += `Size: ${item.size.name}<br>`;
+        if (item.wood?.name) details += `Wood: ${item.wood.name}<br>`;
+        if (item.handle?.name) details += `Handle: ${item.handle.name}<br>`;
+        if (item.handleType?.name) details += `Handle Type: ${item.handleType.name}<br>`;
+        if (item.designs?.[0]?.name) details += `Design: ${item.designs[0].name}<br>`;
+      } 
+      // Gallery Shop items
+      else {
+        if (item.category) details += `<br><strong>Category:</strong> ${item.category}<br>`;
+        if (item.type) details += `<strong>Type:</strong> ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}<br>`;
+        if (item.description) details += `<strong>Description:</strong> ${item.description}<br>`;
+      }
+      
+      details += `</li>`;
+      return details;
+    }).join('');
 
     // --- 3. Totals ---
     const subtotal = items.reduce((sum, i) => sum + ((i.totalPrice || i.price) * i.quantity), 0);
@@ -94,56 +99,138 @@ const itemsList = items.map(item => {
       minute: '2-digit'
     });
 
-    // --- 4. Email HTML ---
+    // ✅ ADD THIS HELPER at the top of the function
+    function encodeAddress(text) {
+      // Convert to HTML entities to prevent linking
+      return text.split('').map(char => {
+        if (char === ' ') return '&nbsp;';
+        if (char === ',') return ',';
+        return `&#${char.charCodeAt(0)};`;
+      }).join('');
+    }
+
+    // ... format date, items, etc. ...
+
     const emailContent = `
       <html>
       <head>
+        <meta name="format-detection" content="address=no">
+        <meta name="format-detection" content="telephone=no">
         <style>
-          body { font-family: Arial; line-height:1.6; color:#333; }
-          .container { max-width:600px; margin:0 auto; padding:20px; }
-          .header { background:#2c3e50; color:white; padding:20px; border-radius:5px 5px 0 0; }
+          body { font-family: Arial, sans-serif; line-height:1.6; color:#333; }
+          .container { max-width:600px; margin:0 auto; padding:20px; background:#ffffff; }
+          .header { background:#2c3e50; color:white; padding:20px; border-radius:5px 5px 0 0; text-align:center; }
           .content { background:white; padding:20px; border:1px solid #ddd; }
-          ul { list-style:none; padding:0; }
-          .footer { background:#f5f5f5; padding:15px; text-align:center; border-radius:0 0 5px 5px; }
+          .info-section { margin:20px 0; padding:15px; background:#f9f9f9; border-left:4px solid #2c3e50; }
+          .info-label { font-weight:bold; color:#2c3e50; display:inline-block; width:120px; }
+          
+          /* NUCLEAR OPTION: Force all links to look like text */
+          .address-box a,
+          .address-box a:link,
+          .address-box a:visited,
+          .address-box a:hover,
+          .address-box a:active {
+            color: #333 !important;
+            text-decoration: none !important;
+            cursor: text !important;
+            pointer-events: none !important;
+          }
+          
+          .address-box {
+            font-family: 'Courier New', Courier, monospace;
+            background: #ffffff;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #333;
+            line-height: 1.8;
+            font-size: 14px;
+          }
+          
+          /* Apple Mail override */
+          a[x-apple-data-detectors] {
+            color: #333 !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+          }
+          
+          ul { list-style:none; padding:0; margin:15px 0; }
+          .total-box { background:#2c3e50; color:white; padding:15px; border-radius:5px; margin:15px 0; }
+          .footer { background:#f5f5f5; padding:15px; text-align:center; border-radius:0 0 5px 5px; font-size:0.9em; color:#666; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎉 New Order Received!</h1>
-            <p>Payment Confirmed - Ready for Processing</p>
+            <h1 style="margin:0;">🎉 New Order Received!</h1>
+            <p style="margin:5px 0;">Payment Confirmed - Ready for Processing</p>
           </div>
+          
           <div class="content">
-            <h2>Order Information</h2>
-            <p><strong>Date:</strong> ${formattedDate}</p>
-            <p><strong>Payment ID:</strong> ${paymentId}</p>
-            <p><strong>Status:</strong> ✅ ${payment.status}</p>
-            <p><strong>Receipt:</strong> <a href="${payment.receiptUrl}" target="_blank">View Receipt</a></p>
+            <div class="info-section">
+              <h2 style="margin-top:0;">📋 Order Information</h2>
+              <p>
+                <span class="info-label">Date:</span> ${formattedDate}<br>
+                <span class="info-label">Payment ID:</span> ${paymentId}<br>
+                <span class="info-label">Status:</span> ✅ ${payment.status}<br>
+                <span class="info-label">Receipt:</span> <a href="${payment.receiptUrl}" target="_blank">View Receipt</a>
+              </p>
+            </div>
             
-            <h2>Customer</h2>
-            <p>${shippingInfo.firstName} ${shippingInfo.lastName}<br>
-               ${shippingInfo.email}<br>${shippingInfo.phone}</p>
+            <div class="info-section">
+              <h2 style="margin-top:0;">👤 Customer</h2>
+              <p>
+                <span class="info-label">Name:</span> ${shippingInfo.firstName} ${shippingInfo.lastName}<br>
+                <span class="info-label">Email:</span> <span style="font-family:monospace;">${safeEmail}</span><br>
+                <span class="info-label">Phone:</span> ${safePhone}
+              </p>
+            </div>
             
-            <h2>Shipping</h2>
-            <p>${shippingInfo.address}<br>
-               ${shippingInfo.apartment ? shippingInfo.apartment + '<br>' : ''}
-               ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}<br>
-               ${shippingInfo.country}</p>
+            <!-- SHIPPING ADDRESS - NUCLEAR FIX -->
+            <div class="info-section">
+  <h2 style="margin-top:0;">📦 Shipping Address</h2>
+  <table style="border:none; width:100%; font-family:monospace; font-size:14px; line-height:1.8;">
+    <tr><td style="padding:2px 0; color:#333;">Street:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.address}</td></tr>
+    ${shippingInfo.apartment ? `<tr><td style="padding:2px 0; color:#333;">Apt:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.apartment}</td></tr>` : ''}
+    <tr><td style="padding:2px 0; color:#333;">City:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.city}</td></tr>
+    <tr><td style="padding:2px 0; color:#333;">State:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.state}</td></tr>
+    <tr><td style="padding:2px 0; color:#333;">ZIP:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.zipCode}</td></tr>
+    <tr><td style="padding:2px 0; color:#333;">Country:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.country}</td></tr>
+  </table>
+</div>
 
-            <h2>Items (${items.length})</h2>
+            <h2>🛒 Items Ordered (${items.length})</h2>
             <ul>${itemsList}</ul>
 
-            <h3>Totals</h3>
-            <p>Subtotal: $${subtotal.toFixed(2)}</p>
-            <p>Tax (6%): $${tax.toFixed(2)}</p>
-            <p><strong>Total Paid: $${total}</strong></p>
+            <div class="total-box">
+              <p style="margin:5px 0;">
+                <span style="display:inline-block;width:120px;">Subtotal:</span> 
+                <span style="float:right;">$${subtotal.toFixed(2)}</span>
+              </p>
+              <p style="margin:5px 0;">
+                <span style="display:inline-block;width:120px;">Tax (6%):</span> 
+                <span style="float:right;">$${tax.toFixed(2)}</span>
+              </p>
+              <hr style="border:none;border-top:1px solid rgba(255,255,255,0.3);margin:10px 0;">
+              <p style="margin:5px 0;font-size:1.2em;font-weight:bold;">
+                <span style="display:inline-block;width:120px;">TOTAL PAID:</span> 
+                <span style="float:right;">$${total}</span>
+              </p>
+            </div>
+            
+            <div class="info-section" style="border-left-color:#e74c3c;">
+              <h3 style="margin-top:0;color:#e74c3c;">⚠️ RETURN POLICY</h3>
+              <p style="margin:0;">All sales are final. There are no refunds on any items from 4Everlilys unless your order is canceled within 24 hours of purchase.</p>
+            </div>
           </div>
 
-          <h3>RETURN POLICY</h3>
-          <p>All sales are final.  There are no refunds on any items from 4Everlilys unless your order is canceled within 24 hours.
           <div class="footer">
-            <p>Order received on ${formattedDate}</p>
-            <p>4EverLilys Wood Crafts</p>
+            <p style="margin:5px 0;">Order received: ${formattedDate}</p>
+            <p style="margin:5px 0;font-weight:bold;">4EverLilys Wood Crafts</p>
+            <p style="margin:5px 0;font-size:0.85em;">This is an automated notification email.</p>
           </div>
         </div>
       </body>
@@ -153,22 +240,31 @@ const itemsList = items.map(item => {
     const subject = `New Order - ${shippingInfo.firstName} ${shippingInfo.lastName} - $${total}`;
 
     // --- 5. Send email ---
-    const info = await resend.emails.send({
-      from: `"4EverLilys Orders" <${process.env.EMAIL_USER}>`,
-      to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
+    console.log('📧 Sending email via Resend...');
+    
+    const response = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: process.env.BUSINESS_EMAIL || 'smackanalex@gmail.com',
       subject,
       html: emailContent,
     });
-
-    console.log('✅ Order notification email sent:', info.id);
-    return { success: true, messageId: info.id };
-
-  } catch (error) {
-    console.error('❌ Error sending email:', error);
-    return { success: false, error: error.message };
-  }
-}
-
+    
+    // ✅ FIX: Resend returns { data: {...}, error: {...} }
+    console.log('📧 Resend full response:', JSON.stringify(response, null, 2));
+    
+    if (response.error) {
+      console.error('❌ Resend error:', response.error);
+      throw new Error(response.error.message || 'Email send failed');
+    }
+    
+    const messageId = response.data?.id || 'email-sent';
+    console.log('✅ Order notification email sent:', messageId);
+    
+    return { 
+      success: true, 
+      messageId: messageId,
+      fullResponse: response.data
+    };
 //
 // Helper: createCatalogItemWithImage (unchanged)
 //
@@ -309,13 +405,13 @@ app.post('/api/process-payment', async (req, res) => {
         country: billingInfo.country || 'US'
       },
       
-      // ✅ ADD: Buyer email for verification
+      // Buyer email for verification
       buyerEmailAddress: shippingInfo.email,
     });
 
     const payment = paymentResponse.result.payment;
     
-    // ✅ CHECK AVS RESULTS
+    // CHECK AVS RESULTS
     const cardDetails = payment.cardDetails;
     console.log('🔒 AVS Check:', cardDetails?.avsStatus);
     console.log('🔒 CVV Check:', cardDetails?.cvvStatus);

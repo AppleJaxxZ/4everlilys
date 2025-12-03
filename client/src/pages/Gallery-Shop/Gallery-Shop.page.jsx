@@ -1,129 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import assignDynamicIds from '../../utilities/assignDynamicIds';
+import { RAW_GALLERY_DATA } from './RAW_GALLERY_DATA';
 import './Gallery-Shop.css';
-
-
-// Mock data for gallery items
-const RAW_GALLERY_DATA = {
-  'available-order': {
-    'lazy-susans': [
-      { name: 'Acacia Lazy Susan 9"', price: 50, image: '/images/gallery/lazy1.jpg' },
-      { name: 'Acacia Lazy Susan 11"', price: 120, image: '/images/gallery/lazy2.jpg' },
-      { name: 'Acacia Lazy Susan 12"', price: 150, image: '/images/gallery/lazy3.jpg' },
-      { name: 'Lazy Susan 14"', price: 120, image: '/images/gallery/lazy2.jpg' },
-      { name: 'Lazy Susan 15"', price: 150, image: '/images/gallery/lazy3.jpg' },
-      { name: ' Lazy Susan 20"', price: 120, image: '/images/gallery/lazy2.jpg' },
-      
-    ],
-    'cutting-boards': [
-      { name: 'Black Walnut 11" x 8 " ', price: 65, image: '/images/gallery/board1.jpg' },
-      { name: 'Black Walnut 14" x 8"', price: 95, image: '/images/gallery/board2.jpg' },
-      { name: 'Black Walnut 19" x 10" ', price: 75, image: '/images/gallery/board3.jpg' },
-      { name: 'Black Walnut 24" x 12"', price: 95, image: '/images/gallery/board2.jpg' },
-      { name: 'Black Walnut 32" x 8.5" ', price: 75, image: '/images/gallery/board3.jpg' },
-      { name: 'Maple Walnut 11" x 8 " ', price: 65, image: '/images/gallery/board1.jpg' },
-      { name: 'Maple Walnut 14" x 8"', price: 95, image: '/images/gallery/board2.jpg' },
-      { name: 'Maple Walnut 19" x 10" ', price: 75, image: '/images/gallery/board3.jpg' },
-      { name: 'Maple Walnut 24" x 12"', price: 95, image: '/images/gallery/board2.jpg' },
-      { name: 'Maple Walnut 32" x 8.5" ', price: 75, image: '/images/gallery/board3.jpg' },
-    ],
-    'tables': [
-      { name: 'Coffee Table', price: 450, image: '/images/gallery/table1.jpg' },
-      { name: 'Side Table', price: 280, image: '/images/gallery/table2.jpg' },
-    ],
-    'trays': [
-      { name: 'Serving Tray Large', price: 55, image: '/images/gallery/tray1.jpg' },
-      { name: 'Breakfast Tray', price: 45, image: '/images/gallery/tray2.jpg' },
-    ],
-    'river-boards': [
-      { name: 'Blue River Board', price: 180, image: '/images/gallery/river1.jpg' },
-      { name: 'Green Wave Board', price: 165, image: '/images/gallery/river2.jpg' },
-    ],
-    'river-tables': [
-      { name: 'Ocean River Table', price: 1200, image: '/images/gallery/IMG_1692.jpg' },
-      { name: 'Lake River Table', price: 950, image: '/images/gallery/rivertable2.jpg' },
-    ],
-    'skulls': [
-      { name: 'Xtra Large Epoxy Skull', price: 20, image: '/images/gallery/skull1.jpg' },
-      { name: 'Large Epoxy Skull ', price: 110, image: '/images/gallery/skull2.jpg' },
-      { name: 'Medium Epoxy Skull', price: 85, image: '/images/gallery/skull1.jpg' },
-      { name: 'Small Epoxy Skull', price: 110, image: '/images/gallery/skull2.jpg' },
-    ],
-    'animals': [
-      { name: 'Large Epoxy Cat', price: 95, image: '/images/gallery/animal1.jpg' },
-      { name: 'Medium Epoxy Cat', price: 135, image: '/images/gallery/animal2.jpg' },
-      { name: 'Small Epoxy Cat', price: 135, image: '/images/gallery/animal2.jpg' },
-      { name: 'Large Epoxy Dog', price: 95, image: '/images/gallery/animal1.jpg' },
-      { name: 'Medium Epoxy Dog', price: 135, image: '/images/gallery/animal2.jpg' },
-      { name: 'Small Epoxy Dog', price: 135, image: '/images/gallery/animal2.jpg' },
-    ],
-    'Coasters': [
-      { name: 'Round Wave Coaster', price: 40, image: '/images/gallery/other1.jpg' },
-      { name: 'Hexagon Wave Coaster', price: 120, image: '/images/gallery/other2.jpg' },
-      { name: 'Square Fence Coaster', price: 40, image: '/images/gallery/other1.jpg' },
-      
-    ],
-    'Bathroom Set': [
-      { name: 'Custom Coaster Set', price: 40, image: '/images/gallery/other1.jpg' },
-      { name: 'Wine Rack', price: 120, image: '/images/gallery/other2.jpg' },
-      { name: 'Wine Rack', price: 120, image: '/images/gallery/other2.jpg' },
-    ],
-    
-  },
-  'for-sale': {
-    'lazy-susans': [
-      { name: 'Acacia Lazy Susan 12"', price: 75, image: '/images/gallery/lazy4.jpg' },
-      { name: 'Maple Lazy Susan 14"', price: 90, image: '/images/gallery/lazy5.jpg' },
-    ],
-    'cutting-boards': [
-      { name: 'Walnut Cutting Board', price: 55, image: '/images/gallery/board4.jpg' },
-      { name: 'Acacia Board with Handle', price: 70, image: '/images/gallery/board5.jpg' },
-    ],
-    'tables': [
-      { name: 'Dining Table', price: 850, image: '/images/gallery/table3.jpg' },
-    ],
-    'trays': [
-      { name: 'Decorative Tray', price: 48, image: '/images/gallery/tray3.jpg' },
-    ],
-    'river-boards': [
-      { name: 'Turquoise River Board', price: 175, image: '/images/gallery/river3.jpg' },
-    ],
-    'river-tables': [
-      { name: 'Sky River Table', price: 1100, image: '/images/gallery/rivertable3.jpg' },
-    ],
-    'skulls': [
-      { name: 'Wooden Skull', price: 90, image: '/images/gallery/skull3.jpg' },
-    ],
-    'animals': [
-      { name: 'Wolf Carving', price: 105, image: '/images/gallery/animal3.jpg' },
-    ],
-    'other': [
-      { name: 'Jewelry Box', price: 65, image: '/images/gallery/other3.jpg' },
-    ],
-  },
-};
 
 const GALLERY_DATA = assignDynamicIds(RAW_GALLERY_DATA);
 
 const CATEGORIES = [
   { id: 'lazy-susans', name: 'Lazy Susans', icon: '🌀' },
-  { id: 'cutting-boards', name: 'Cutting Boards', icon: '🔪' },
-  { id: 'tables', name: 'Tables', icon: '🪑' },
-  { id: 'trays', name: 'Trays', icon: '🍽️' },
-  { id: 'river-boards', name: 'River Boards', icon: '🌊' },
-  { id: 'river-tables', name: 'River Tables', icon: '💧' },
+  { id: 'wave-cutting-boards', name: 'Wave Cutting Boards', icon: '🌊' },
+  { id: 'floral', name: 'Floral Cutting Boards', icon: '🌸' },
+  { id: 'scene-boards', name: 'Scene Cutting Boards', icon: '🌌' },
+  { id: 'river-boards', name: 'River Boards', icon: '🦦' },
+  { id: 'tables', name: 'Tables', icon: '💧' },
   { id: 'skulls', name: 'Skulls', icon: '💀' },
   { id: 'animals', name: 'Animals', icon: '🦅' },
-  { id: 'holidays', name: 'Holidays', icon: '✨' },
+  { id: 'coasters', name: 'Coasters', icon: '🍹' },
+  { id: 'bathroom-set', name: 'Bathroom Sets', icon: '🛀' },
+  { id: 'holidays', name: 'Holidays', icon: '🎊' },
+  { id: 'other', name: 'Other', icon: '✨' },
 ];
 
 function GalleryShop({ addToCart }) {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('available-order');
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState(4); // Start with middle item
+  
+  // ✅ Load from sessionStorage or default to index 4
+  const [activeSection, setActiveSection] = useState(() => {
+    return sessionStorage.getItem('gallerySection') || 'available-order';
+  });
+  
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(() => {
+    const saved = sessionStorage.getItem('galleryCategoryIndex');
+    return saved !== null ? parseInt(saved, 10) : 4;
+  });
+  
   const [showModal, setShowModal] = useState(false);
   const [addedItem, setAddedItem] = useState(null);
+
+  // ✅ Save to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem('gallerySection', activeSection);
+  }, [activeSection]);
+
+  useEffect(() => {
+    sessionStorage.setItem('galleryCategoryIndex', activeCategoryIndex);
+  }, [activeCategoryIndex]);
 
   const activeCategory = CATEGORIES[activeCategoryIndex];
   const items = GALLERY_DATA[activeSection][activeCategory.id] || [];
@@ -140,29 +61,18 @@ function GalleryShop({ addToCart }) {
     }
   };
 
-  // ENHANCED: Add to cart with image URL for Square
   const handleAddToCart = (item) => {
     const cartItem = {
       ...item,
-      id: `gallery-${Date.now()}`, // Unique string ID for gallery items
+      id: `gallery-${Date.now()}`,
       quantity: 1,
       type: activeSection === 'available-order' ? 'order' : 'sale',
       category: activeCategory.name,
-      
-      // IMPORTANT: Add imageUrl for Square catalog
-      imageUrl: item.image, // This is what the server expects for images
-      
-      // Keep the original image property for display
+      imageUrl: item.image,
       image: item.image,
-      
-      // Add description for Square
       description: `${activeCategory.name} - ${item.name}`,
-      
-      // Flag to indicate this is a gallery item (not custom)
       isCustom: false,
-      
-      // Ensure price fields are consistent
-      totalPrice: item.price, // Use same price for consistency
+      totalPrice: item.price,
     };
     
     addToCart(cartItem);
@@ -258,7 +168,18 @@ function GalleryShop({ addToCart }) {
         ) : (
           <div className="items-grid">
             {items.map((item) => (
-              <div key={item.id} className="item-card">
+              <div
+                key={item.id}
+                className="item-card"
+                onClick={() => navigate('/item-detail', {
+                  state: {
+                    item: item,
+                    category: activeCategory.name,
+                    section: activeSection
+                  }
+                })}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="item-image-container">
                   <img
                     src={item.image}
@@ -273,7 +194,10 @@ function GalleryShop({ addToCart }) {
                   <p className="item-price">${item.price}</p>
                   <button
                     className="add-to-cart-btn"
-                    onClick={() => handleAddToCart(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(item);
+                    }}
                   >
                     {activeSection === 'available-order' ? 'Order And Pay Now' : 'Buy Now'}
                   </button>

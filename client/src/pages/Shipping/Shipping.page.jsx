@@ -4,7 +4,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './Shipping.css';
 
-function Shipping({ cart, user }) {
+function Shipping({ cart, user, getCartTotal }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -134,6 +134,22 @@ const handleBillingChange = (e) => {
     if (!shippingData.zipCode.trim()) {
       newErrors.zipCode = 'ZIP code is required';
     }
+
+     // Billing validation if separate billing address
+  if (!billingSameAsShipping) {
+    if (!billingInfo.address.trim()) {
+      newErrors.billingAddress = 'Billing address is required';
+    }
+    if (!billingInfo.city.trim()) {
+      newErrors.billingCity = 'Billing city is required';
+    }
+    if (!billingInfo.state.trim()) {
+      newErrors.billingState = 'Billing state is required';
+    }
+    if (!billingInfo.zipCode.trim()) {
+      newErrors.billingZipCode = 'Billing ZIP code is required';
+    }
+  }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -238,13 +254,7 @@ const handleBillingChange = (e) => {
     }
   };
 
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => {
-      const price = item.totalPrice || item.price || 0;
-      const quantity = item.quantity || 1;
-      return total + (price * quantity);
-    }, 0);
-  };
+ 
 
   if (loadingProfile) {
     return (
@@ -629,7 +639,7 @@ const handleBillingChange = (e) => {
               
               <div className="summary-row">
                 <span>Subtotal</span>
-                <span>${calculateTotal().toFixed(2)}</span>
+                <span>${getCartTotal().toFixed(2)}</span>
               </div>
               
               <div className="summary-row">
@@ -646,7 +656,7 @@ const handleBillingChange = (e) => {
               
               <div className="summary-row total">
                 <span>Estimated Total</span>
-                <span>${calculateTotal().toFixed(2)}</span>
+                <span>${getCartTotal().toFixed(2)}</span>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Checkout.css';
 
-function Checkout({ cart = [], user, updateQuantity, removeFromCart }) {
+function Checkout({ cart = [], user, updateQuantity, removeFromCart, getCartTotal }) {
   const navigate = useNavigate();
 
   
@@ -14,13 +14,7 @@ console.log('🛒 Has gift?', !!validCart[0]?.gift);
 console.log('🛒 Has size?', !!validCart[0]?.size);
 console.log('🛒 Has wood?', !!validCart[0]?.wood);
 
-  const calculateTotal = () => {
-    return validCart.reduce((total, item) => {
-      const price = item.totalPrice || item.price || 0;
-      const quantity = item.quantity || 1;
-      return total + (price * quantity);
-    }, 0);
-  };
+  
 
   const calculateSubtotal = (item) => {
     const price = item.totalPrice || item.price || 0;
@@ -143,7 +137,7 @@ console.log('🛒 Has wood?', !!validCart[0]?.wood);
                   <p><strong>Custom Items:</strong> 2-4 weeks for crafting</p>
                   <p><strong>Ready-Made:</strong> Ships in 3-5 business days</p>
                   <p><strong>Delivery:</strong> 5-7 business days via standard shipping</p>
-                  <p className="info-note">📍 Tracking information provided with all orders</p>
+                  <p className="info-note">📍 Tracking information will be sent via email as soon as your package is shipped.</p>
                 </div>
               </div>
 
@@ -169,7 +163,7 @@ console.log('🛒 Has wood?', !!validCart[0]?.wood);
             
             <div className="summary-row">
               <span>Subtotal ({validCart.length} {validCart.length === 1 ? 'item' : 'items'})</span>
-              <span>${calculateTotal().toFixed(2)}</span>
+              <span>${getCartTotal().toFixed(2)}</span>
             </div>
 
             <div className="summary-row">
@@ -186,7 +180,7 @@ console.log('🛒 Has wood?', !!validCart[0]?.wood);
 
             <div className="summary-row total">
               <span>Subtotal</span>
-              <span>${calculateTotal().toFixed(2)}</span>
+              <span>${getCartTotal().toFixed(2)}</span>
             </div>
 
             <button 

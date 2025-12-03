@@ -267,6 +267,115 @@
     font-weight: bold;
     font-size: 1.2rem;
   }
+
+  /* Wood Grid */
+.wood-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 25px;
+  margin: 30px 0;
+}
+
+.wood-card {
+  background-color: var(--background);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+}
+
+.wood-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.wood-card.selected {
+  border-color: var(--primary-color);
+  background-color: var(--background-light);
+  box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+}
+
+.wood-image-container {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background-color: var(--background-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wood-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wood-card h3 {
+  font-size: 1rem;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+/* Handle Options Grid */
+.handle-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  margin: 30px 0;
+}
+
+.handle-option-card {
+  background-color: var(--background);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+}
+
+.handle-option-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.handle-option-card h3 {
+  font-size: 1.2rem;
+  color: var(--text-dark);
+  margin-top: 10px;
+}
+
+/* Responsive for wood and handle grids */
+@media screen and (max-width: 768px) {
+  .wood-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .handle-options-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .wood-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .handle-options-grid {
+    grid-template-columns: 1fr;
+  }
+}
   
   /* Review Container */
   .review-container {

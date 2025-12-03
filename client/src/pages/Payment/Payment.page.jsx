@@ -5,7 +5,7 @@ import { db } from '../../firebase';
 import SquarePayment from '../../assests/SquarePayment';
 import './Payment.css';
 
-function Payment({ cart, user, removeFromCart }) {
+function Payment({ cart, user, clearCart, getCartTotal }) {
   const navigate = useNavigate();
   const [shippingInfo, setShippingInfo] = useState(null);
   const [billingInfo, setBillingInfo] = useState(null);
@@ -110,7 +110,7 @@ function Payment({ cart, user, removeFromCart }) {
     };
 
     // Clear cart
-    cart.forEach(item => removeFromCart(item.id));
+    clearCart();
     
     // Clear checkout info from session
     sessionStorage.removeItem('shippingInfo');
@@ -204,7 +204,7 @@ function Payment({ cart, user, removeFromCart }) {
                   <p><strong>Custom Items:</strong> 2-4 weeks for crafting</p>
                   <p><strong>Ready-Made:</strong> Ships in 3-5 business days</p>
                   <p><strong>Delivery:</strong> 5-7 business days via standard shipping</p>
-                  <p className="info-note">📍 Tracking information provided with all orders</p>
+                  <p className="info-note">📍 Tracking information provided with all orders as soon as your package is shipped.</p>
                 </div>
               </div>
 
@@ -229,7 +229,7 @@ function Payment({ cart, user, removeFromCart }) {
               
               {paymentError && (
                 <div className="payment-error">
-                  ❌ {paymentError}
+                  ❌ {paymentError} Please Check your card details and try again.
                 </div>
               )}
               
@@ -314,7 +314,7 @@ function Payment({ cart, user, removeFromCart }) {
                 <>
                   <div className="summary-row">
                     <span>Subtotal</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span>${getCartTotal().toFixed(2)}</span>
                   </div>
                   <div className="summary-row">
                     <span>Tax (6%)</span>

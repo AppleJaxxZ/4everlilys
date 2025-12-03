@@ -61,7 +61,7 @@ function Navbar({ user, cartCount }) {
           </li>
           <li className="nav-item">
             <Link to="/checkout" className="nav-link" onClick={closeMenu}>
-              Cart ({cartCount})
+            🛒 Cart ({cartCount})
             </Link>
           </li>
           {user ? (

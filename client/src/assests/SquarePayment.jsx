@@ -12,6 +12,21 @@ function SquarePayment({
   onPaymentError 
 }) {
   const [loading, setLoading] = useState(false);
+
+  // ✅ ADD THIS - Debug environment variables
+  React.useEffect(() => {
+    console.log('🔍 Square Configuration:');
+    console.log('  App ID:', process.env.REACT_APP_SQUARE_APP_ID?.substring(0, 25) + '...');
+    console.log('  Location ID:', process.env.REACT_APP_SQUARE_LOCATION_ID);
+    console.log('  Backend URL:', process.env.REACT_APP_BACKEND_URL);
+    
+    if (!process.env.REACT_APP_SQUARE_APP_ID) {
+      console.error('❌ MISSING: REACT_APP_SQUARE_APP_ID');
+    }
+    if (!process.env.REACT_APP_SQUARE_LOCATION_ID) {
+      console.error('❌ MISSING: REACT_APP_SQUARE_LOCATION_ID');
+    }
+  }, []);
   
   // Function to prepare items with images for payment
   const prepareItemsForPayment = (items) => {

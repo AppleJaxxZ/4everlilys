@@ -1,73 +1,84 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CustomBuilder.css';
+import { getImageUrl } from '../../utilities/getImageUrl';
 
-// TEMPLATE DATA - Easily customizable
+
 const GIFTS = [
-  /******Lazy Susans******/
-  { id: 1, name: 'Lazy Susans', image: '/images/gifts/lrg_lzy_flr.jpg',  basePrice: 50,
-     sizes : [
-    { id: 1, name: '9" Small ', image: '/images/sizes/small.jpg' },
-    { id: 2, name: '11" Medium/Small', image: '/images/sizes/small.jpg' },
-    { id: 3, name: '12" Medium', image: '/images/sizes/small.jpg' },
-    { id: 4, name: '14" Medium', image: '/images/sizes/small.jpg' },
-    { id: 5, name: '15" Medium ', image: '/images/sizes/medium.jpg' },
-    { id: 6, name: '20" Large', image: '/images/sizes/large.jpg' },
-  ] },
-  /******CuttingBoardss******/
-  { id: 2, name: 'Cutting Boards', image: '/images/gifts/IMG_2107.jpg', basePrice: 30,
-    sizes :[
-      { id: 1, name: 'Small 11" x 8"', image: '/images/sizes/small.jpg' },
-      { id: 2, name: ' Medium 14" x 8" ', image: '/images/sizes/medium,jpg' },
-      {id: 3, name: 'Medium/Large 19"', image: '/images/sizes/medium.jpg' },
-      { id: 4, name: 'Large 24" x 12"', image: '/images/sizes/large.jpg' },
-      { id: 5, name: 'XLarge 32" x 8.5"', image: '/images/sizes/large.jpg' },
+  {
+    id: 1,
+    name: 'Lazy Susans',
+    image: getImageUrl('/images/gifts/lrg_lzy_flr.jpg'),
+    basePrice: 50,
+    sizes: [
+      { id: 1, name: '9" Small ', image: getImageUrl('/images/sizes/small.jpg', 300) },
+      { id: 2, name: '11" Medium/Small', image: getImageUrl('/images/sizes/small.jpg', 300) },
+      { id: 3, name: '12" Medium', image: getImageUrl('/images/sizes/small.jpg', 300) },
+      { id: 4, name: '14" Medium', image: getImageUrl('/images/sizes/small.jpg', 300) },
+      { id: 5, name: '15" Medium ', image: getImageUrl('/images/sizes/medium.jpg', 300) },
+      { id: 6, name: '20" Large', image: getImageUrl('/images/sizes/large.jpg', 300) },
     ]
-   },
-   /******Double Sided Resin Boards******/
-  { id: 3, name: 'Double Sided Waveboards', image: '/images/gifts/image000000 (5).jpg', basePrice: 60, 
-    sizes :[
-      { id: 1, name: 'Medium 19.5" x 7.75" ', image: '/images/sizes/small.jpg' },
-      { id:2, name: '14" Medium 3/4inch + thickness', image: '/images/sizes/medium.jpg' },
-      { id: 3, name: '20" Large', image: '/images/sizes/large.jpg' },
+  },
+  {
+    id: 2,
+    name: 'Cutting Boards',
+    image: getImageUrl('/images/gifts/IMG_2107.jpg'),
+    basePrice: 30,
+    sizes: [
+      { id: 1, name: 'Small 11" x 8"', image: getImageUrl('/images/sizes/small.jpg', 300) },
+      { id: 2, name: ' Medium 14" x 8" ', image: getImageUrl('/images/sizes/medium.jpg', 300) },
+      { id: 3, name: 'Medium/Large 19"', image: getImageUrl('/images/sizes/medium.jpg', 300) },
+      { id: 4, name: 'Large 24" x 12"', image: getImageUrl('/images/sizes/large.jpg', 300) },
+      { id: 5, name: 'XLarge 32" x 8.5"', image: getImageUrl('/images/sizes/large.jpg', 300) },
     ]
-   },
-  { id: 4, name: 'Coasters', image: '/images/gifts/IMG_2110.jpg', basePrice: 35 },
-  { id: 5, name: 'Trinket Trays', image: '/images/gifts/trinketTrays.jpg', basePrice: 25 },
-  { id: 6, name: 'Gift 6', image: '/images/gifts/gift6.jpg', basePrice: 40 },
-  { id: 7, name: 'Gift 7', image: '/images/gifts/gift7.jpg', basePrice: 27 },
-  { id: 8, name: 'Gift 8', image: '/images/gifts/gift8.jpg', basePrice: 33 },
-  { id: 9, name: 'Gift 9', image: '/images/gifts/gift9.jpg', basePrice: 38 },
-  { id: 10, name: 'Gift 10', image: '/images/gifts/gift10.jpg', basePrice: 45 }
+  },
+  {
+    id: 3,
+    name: 'Double Sided Waveboards',
+    image: getImageUrl('/images/gifts/image000000 (5).jpg'),
+    basePrice: 60,
+    sizes: [
+      { id: 1, name: 'Medium 19.5" x 7.75" ', image: getImageUrl('/images/sizes/small.jpg', 300) },
+      { id: 2, name: '14" Medium 3/4inch + thickness', image: getImageUrl('/images/sizes/medium.jpg', 300) },
+      { id: 3, name: '20" Large', image: getImageUrl('/images/sizes/large.jpg', 300) },
+    ]
+  },
+  { id: 4, name: 'Coasters', image: getImageUrl('/images/gifts/IMG_2110.jpg'), basePrice: 35 },
+  { id: 5, name: 'Trinket Trays', image: getImageUrl('/images/gifts/trinketTrays.jpg'), basePrice: 25 },
+  { id: 6, name: 'Table', image: getImageUrl('/images/gifts/gift6.jpg'), basePrice: 40 },
+  { id: 7, name: 'Gift 7', image: getImageUrl('/images/gifts/gift7.jpg'), basePrice: 27 },
+  { id: 8, name: 'Gift 8', image: getImageUrl('/images/gifts/gift8.jpg'), basePrice: 33 },
+  { id: 9, name: 'Gift 9', image: getImageUrl('/images/gifts/gift9.jpg'), basePrice: 38 },
+  { id: 10, name: 'Gift 10', image: getImageUrl('/images/gifts/gift10.jpg'), basePrice: 45 }
 ];
 
 const WOOD = [
-  { id: 1, name: 'Acacia (Finished Example)', image: '/images/wood/acacia.jpg' },
-  { id: 2, name: 'Cherry (Finished Example)', image: '/images/wood/cherry.jpg' },
-  { id: 3, name: 'Maple (Finished Example)', image: '/images/wood/maple.jpg' },
-  { id: 4, name: 'Walnut (Finished Example)', image: '/images/wood/walnut.jpg' },
-  { id: 5, name: 'Black Walnut (Finished Example)', image: '/images/wood/black-walnut.jpg' },
+  { id: 1, name: 'Acacia (Finished Example)', image: getImageUrl('/images/wood/acacia.jpg') },
+  { id: 2, name: 'Cherry (Finished Example)', image: getImageUrl('/images/wood/cherry.jpg') },
+  { id: 3, name: 'Maple (Finished Example)', image: getImageUrl('/images/wood/maple.jpg') },
+  { id: 4, name: 'Walnut (Finished Example)', image: getImageUrl('/images/wood/walnut.jpg') },
+  { id: 5, name: 'Black Walnut (Finished Example)', image: getImageUrl('/images/wood/black-walnut.jpg') },
 ];
 
 const HANDLE_OPTIONS = [
-  { id: 'handle', name: 'With Handle', image: '/images/handles/with-handle.jpg' },
-  { id: 'no-handle', name: 'No Handle', image: '/images/handles/no-handle.jpg' }
+  { id: 'handle', name: 'With Handle', image: getImageUrl('/images/handles/with-handle.jpg') },
+  { id: 'no-handle', name: 'No Handle', image: getImageUrl('/images/handles/no-handle.jpg') }
 ];
 
 const HANDLE_TYPES = [
-  { id: 'wide', name: 'Wide Handle', image: '/images/handles/wide.jpg' },
-  { id: 'knob', name: 'Knob Handle', image: '/images/handles/knob.jpg' },
-  { id: 'hook', name: 'Hook Handle', image: '/images/handles/hook.jpg' }
+  { id: 'wide', name: 'Wide Handle', image: getImageUrl('/images/handles/wide.jpg') },
+  { id: 'knob', name: 'Knob Handle', image: getImageUrl('/images/handles/knob.jpg') },
+  { id: 'hook', name: 'Hook Handle', image: getImageUrl('/images/handles/hook.jpg') }
 ];
 
 const DESIGN_TYPES = [
-  { id: 1, name: 'Flowers and Corks', image: '/images/designs/flowers-corks.jpg', priceModifier: 10 },
-  { id: 2, name: 'Pressed Flowers', image: '/images/designs/pressed-flowers.jpg', priceModifier: 50 },
-  { id: 3, name: 'Blue Waves', image: '/images/designs/blue-waves.jpg', priceModifier: 45 },
-  { id: 4, name: 'Green Waves', image: '/images/designs/green-waves.jpg', priceModifier: 45 },
-  { id: 5, name: 'Sand, Sea Shells and Creatures', image: '/images/designs/sea-shells.jpg', priceModifier: 20 },
-  { id: 6, name: 'Poker/Cards', image: '/images/designs/poker-cards.jpg', priceModifier: 10 },
-  { id: 7, name: 'Other', image: '/images/designs/other.jpg', priceModifier: 0 }
+  { id: 1, name: 'Flowers and Corks', image: getImageUrl('/images/designs/flowers-corks.jpg'), priceModifier: 10 },
+  { id: 2, name: 'Pressed Flowers', image: getImageUrl('/images/designs/pressed-flowers.jpg'), priceModifier: 50 },
+  { id: 3, name: 'Blue Waves', image: getImageUrl('/images/designs/blue-waves.jpg'), priceModifier: 45 },
+  { id: 4, name: 'Green Waves', image: getImageUrl('/images/designs/green-waves.jpg'), priceModifier: 45 },
+  { id: 5, name: 'Sand, Sea Shells and Creatures', image: getImageUrl('/images/designs/sea-shells.jpg'), priceModifier: 20 },
+  { id: 6, name: 'Poker/Cards', image: getImageUrl('/images/designs/poker-cards.jpg'), priceModifier: 10 },
+  { id: 7, name: 'Other', image: getImageUrl('/images/designs/other.jpg'), priceModifier: 0 }
 ];
 
 function CustomBuilder({ addToCart }) {
@@ -159,6 +170,13 @@ function CustomBuilder({ addToCart }) {
 
   const handleWoodSelect = (wood) => {
     setSelectedWood(wood);
+    
+    // Auto-advance to next step after selection
+    if (shouldShowHandleSteps()) {
+      setStep(4); // Go to handle options
+    } else {
+      setStep(6); // Skip to design selection
+    }
   };
 
   const handleContinueFromWood = () => {
@@ -427,9 +445,7 @@ function CustomBuilder({ addToCart }) {
               <button className="back-button" onClick={() => goToStep(2)}>
                 ← Back to Size
               </button>
-              <button className="continue-button" onClick={handleContinueFromWood}>
-                Continue →
-              </button>
+             
             </div>
           </div>
         )}
