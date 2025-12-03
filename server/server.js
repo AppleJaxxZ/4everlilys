@@ -40,6 +40,14 @@ console.log(process.env.NODE_ENV);
 // Helper: Send order notification email
 //
 async function sendOrderNotificationEmail({ paymentId, amount, items, shippingInfo, orderDate }) {
+  // Add this helper function at the top of sendOrderNotificationEmail
+function preventLinking(text) {
+  // Convert each character to HTML entity
+  return text.split('').map(char => {
+    if (char === ' ') return '&nbsp;';
+    return `&#${char.charCodeAt(0)};`;
+  }).join('');
+}
   try {
     // Check environment variables
     if (!process.env.RESEND_API_KEY) {
@@ -98,136 +106,62 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
       hour: '2-digit',
       minute: '2-digit'
     });
-    
-    function encodeAddress(text) {
-      // Convert to HTML entities to prevent linking
-      return text.split('').map(char => {
-        if (char === ' ') return '&nbsp;';
-        if (char === ',') return ',';
-        return `&#${char.charCodeAt(0)};`;
-      }).join('');
-    }
 
-    // ... format date, items, etc. ...
-
+    // --- 4. Email HTML ---
     const emailContent = `
       <html>
       <head>
-        <meta name="format-detection" content="address=no">
-        <meta name="format-detection" content="telephone=no">
         <style>
-          body { font-family: Arial, sans-serif; line-height:1.6; color:#333; }
-          .container { max-width:600px; margin:0 auto; padding:20px; background:#ffffff; }
-          .header { background:#2c3e50; color:white; padding:20px; border-radius:5px 5px 0 0; text-align:center; }
+          body { font-family: Arial; line-height:1.6; color:#333; }
+          .container { max-width:600px; margin:0 auto; padding:20px; }
+          .header { background:#2c3e50; color:white; padding:20px; border-radius:5px 5px 0 0; }
           .content { background:white; padding:20px; border:1px solid #ddd; }
-          .info-section { margin:20px 0; padding:15px; background:#f9f9f9; border-left:4px solid #2c3e50; }
-          .info-label { font-weight:bold; color:#2c3e50; display:inline-block; width:120px; }
-          
-          /* NUCLEAR OPTION: Force all links to look like text */
-          .address-box a,
-          .address-box a:link,
-          .address-box a:visited,
-          .address-box a:hover,
-          .address-box a:active {
-            color: #333 !important;
-            text-decoration: none !important;
-            cursor: text !important;
-            pointer-events: none !important;
-          }
-          
-          .address-box {
-            font-family: 'Courier New', Courier, monospace;
-            background: #ffffff;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            color: #333;
-            line-height: 1.8;
-            font-size: 14px;
-          }
-          
-          /* Apple Mail override */
-          a[x-apple-data-detectors] {
-            color: #333 !important;
-            text-decoration: none !important;
-            font-size: inherit !important;
-            font-family: inherit !important;
-            font-weight: inherit !important;
-            line-height: inherit !important;
-          }
-          
-          ul { list-style:none; padding:0; margin:15px 0; }
-          .total-box { background:#2c3e50; color:white; padding:15px; border-radius:5px; margin:15px 0; }
-          .footer { background:#f5f5f5; padding:15px; text-align:center; border-radius:0 0 5px 5px; font-size:0.9em; color:#666; }
+          ul { list-style:none; padding:0; }
+          .footer { background:#f5f5f5; padding:15px; text-align:center; border-radius:0 0 5px 5px; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h1 style="margin:0;">🎉 New Order Received!</h1>
-            <p style="margin:5px 0;">Payment Confirmed - Ready for Processing</p>
+            <h1>🎉 New Order Received!</h1>
+            <p>Payment Confirmed - Ready for Processing</p>
           </div>
-          
           <div class="content">
-            <div class="info-section">
-              <h2 style="margin-top:0;">📋 Order Information</h2>
-              <p>
-                <span class="info-label">Date:</span> ${formattedDate}<br>
-                <span class="info-label">Payment ID:</span> ${paymentId}<br>
-                <span class="info-label">Status:</span> ✅ ${payment.status}<br>
-                <span class="info-label">Receipt:</span> <a href="${payment.receiptUrl}" target="_blank">View Receipt</a>
-              </p>
-            </div>
+            <h2>Order Information</h2>
+            <p><strong>Date:</strong> ${formattedDate}</p>
+            <p><strong>Payment ID:</strong> ${paymentId}</p>
+            <p><strong>Status:</strong> ✅ ${payment.status}</p>
+            <p><strong>Receipt:</strong> <a href="${payment.receiptUrl}" target="_blank">View Receipt</a></p>
+            
+            <h2>Customer</h2>
+            <p>${shippingInfo.firstName} ${shippingInfo.lastName}<br>
+               ${shippingInfo.email}<br>${shippingInfo.phone}</p>
             
             <div class="info-section">
-              <h2 style="margin-top:0;">👤 Customer</h2>
-              <p>
-                <span class="info-label">Name:</span> ${shippingInfo.firstName} ${shippingInfo.lastName}<br>
-                <span class="info-label">Email:</span> <span style="font-family:monospace;">${safeEmail}</span><br>
-                <span class="info-label">Phone:</span> ${safePhone}
-              </p>
-            </div>
-            
-            <!-- SHIPPING ADDRESS - NUCLEAR FIX -->
-            <div class="info-section">
-              <h2 style="margin-top:0;">📦 Shipping Address</h2>
-              <div class="address-box">
-                ${encodeAddress(shippingInfo.address)}<br>
-                ${shippingInfo.apartment ? encodeAddress(shippingInfo.apartment) + '<br>' : ''}
-                ${encodeAddress(shippingInfo.city)},&nbsp;${shippingInfo.state}&nbsp;${shippingInfo.zipCode}<br>
-                ${encodeAddress(shippingInfo.country)}
-              </div>
-            </div>
+  <h2 style="margin-top:0;">📦 Shipping Address</h2>
+  <div style="font-family:monospace; background:#fff; padding:10px; border:1px solid #ddd; border-radius:4px;">
+    ${preventLinking(shippingInfo.address)}<br>
+    ${shippingInfo.apartment ? preventLinking(shippingInfo.apartment) + '<br>' : ''}
+    ${preventLinking(shippingInfo.city + ', ' + shippingInfo.state + ' ' + shippingInfo.zipCode)}<br>
+    ${preventLinking(shippingInfo.country)}
+  </div>
+</div>
 
-            <h2>🛒 Items Ordered (${items.length})</h2>
+            <h2>Items (${items.length})</h2>
             <ul>${itemsList}</ul>
 
-            <div class="total-box">
-              <p style="margin:5px 0;">
-                <span style="display:inline-block;width:120px;">Subtotal:</span> 
-                <span style="float:right;">$${subtotal.toFixed(2)}</span>
-              </p>
-              <p style="margin:5px 0;">
-                <span style="display:inline-block;width:120px;">Tax (6%):</span> 
-                <span style="float:right;">$${tax.toFixed(2)}</span>
-              </p>
-              <hr style="border:none;border-top:1px solid rgba(255,255,255,0.3);margin:10px 0;">
-              <p style="margin:5px 0;font-size:1.2em;font-weight:bold;">
-                <span style="display:inline-block;width:120px;">TOTAL PAID:</span> 
-                <span style="float:right;">$${total}</span>
-              </p>
-            </div>
+            <h3>Totals</h3>
+            <p>Subtotal: $${subtotal.toFixed(2)}</p>
+            <p>Tax (6%): $${tax.toFixed(2)}</p>
+            <p><strong>Total Paid: $${total}</strong></p>
             
-            <div class="info-section" style="border-left-color:#e74c3c;">
-              <h3 style="margin-top:0;color:#e74c3c;">⚠️ RETURN POLICY</h3>
-              <p style="margin:0;">All sales are final. There are no refunds on any items from 4Everlilys unless your order is canceled within 24 hours of purchase.</p>
-            </div>
+            <h3>RETURN POLICY</h3>
+            <p>All sales are final. There are no refunds on any items from 4Everlilys unless your order is canceled within 24 hours.</p>
           </div>
 
           <div class="footer">
-            <p style="margin:5px 0;">Order received: ${formattedDate}</p>
-            <p style="margin:5px 0;font-weight:bold;">4EverLilys Wood Crafts</p>
-            <p style="margin:5px 0;font-size:0.85em;">This is an automated notification email.</p>
+            <p>Order received on ${formattedDate}</p>
+            <p>4EverLilys Wood Crafts</p>
           </div>
         </div>
       </body>

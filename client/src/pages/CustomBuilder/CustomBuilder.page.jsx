@@ -179,17 +179,17 @@ function CustomBuilder({ addToCart }) {
     }
   };
 
-  const handleContinueFromWood = () => {
-    if (selectedWood) {
-      if (shouldShowHandleSteps()) {
-        setStep(4);
-      } else {
-        setStep(6);
-      }
-    } else {
-      alert('Please select a wood type');
-    }
-  };
+  // const handleContinueFromWood = () => {
+  //   if (selectedWood) {
+  //     if (shouldShowHandleSteps()) {
+  //       setStep(4);
+  //     } else {
+  //       setStep(6);
+  //     }
+  //   } else {
+  //     alert('Please select a wood type');
+  //   }
+  // };
 
   const handleHandleOptionSelect = (handleOption) => {
     setSelectedHandle(handleOption);
