@@ -131,7 +131,7 @@ function preventLinking(text) {
             <p><strong>Date:</strong> ${formattedDate}</p>
             <p><strong>Payment ID:</strong> ${paymentId}</p>
             <p><strong>Status:</strong> ✅ ${payment.status}</p>
-            <p><strong>Receipt:</strong> <a href="${payment.receiptUrl}" target="_blank">View Receipt</a></p>
+            
             
             <h2>Customer</h2>
             <p>${shippingInfo.firstName} ${shippingInfo.lastName}<br>
