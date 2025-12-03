@@ -98,8 +98,7 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
       hour: '2-digit',
       minute: '2-digit'
     });
-
-    // ✅ ADD THIS HELPER at the top of the function
+    
     function encodeAddress(text) {
       // Convert to HTML entities to prevent linking
       return text.split('').map(char => {
@@ -191,16 +190,14 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
             
             <!-- SHIPPING ADDRESS - NUCLEAR FIX -->
             <div class="info-section">
-  <h2 style="margin-top:0;">📦 Shipping Address</h2>
-  <table style="border:none; width:100%; font-family:monospace; font-size:14px; line-height:1.8;">
-    <tr><td style="padding:2px 0; color:#333;">Street:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.address}</td></tr>
-    ${shippingInfo.apartment ? `<tr><td style="padding:2px 0; color:#333;">Apt:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.apartment}</td></tr>` : ''}
-    <tr><td style="padding:2px 0; color:#333;">City:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.city}</td></tr>
-    <tr><td style="padding:2px 0; color:#333;">State:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.state}</td></tr>
-    <tr><td style="padding:2px 0; color:#333;">ZIP:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.zipCode}</td></tr>
-    <tr><td style="padding:2px 0; color:#333;">Country:</td><td style="padding:2px 0 2px 10px; color:#333;">${shippingInfo.country}</td></tr>
-  </table>
-</div>
+              <h2 style="margin-top:0;">📦 Shipping Address</h2>
+              <div class="address-box">
+                ${encodeAddress(shippingInfo.address)}<br>
+                ${shippingInfo.apartment ? encodeAddress(shippingInfo.apartment) + '<br>' : ''}
+                ${encodeAddress(shippingInfo.city)},&nbsp;${shippingInfo.state}&nbsp;${shippingInfo.zipCode}<br>
+                ${encodeAddress(shippingInfo.country)}
+              </div>
+            </div>
 
             <h2>🛒 Items Ordered (${items.length})</h2>
             <ul>${itemsList}</ul>
@@ -242,29 +239,36 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
     // --- 5. Send email ---
     console.log('📧 Sending email via Resend...');
     
-    const response = await resend.emails.send({
+    const info = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: process.env.BUSINESS_EMAIL || 'smackanalex@gmail.com',
       subject,
       html: emailContent,
     });
+
+    // ✅ FIX: Log the full response to see structure
+    console.log('📧 Resend response:', JSON.stringify(info, null, 2));
+
+    // ✅ FIX: Handle different response structures
+    const messageId = info?.id || info?.data?.id || info?.messageId || 'email-sent-no-id';
     
-    // ✅ FIX: Resend returns { data: {...}, error: {...} }
-    console.log('📧 Resend full response:', JSON.stringify(response, null, 2));
-    
-    if (response.error) {
-      console.error('❌ Resend error:', response.error);
-      throw new Error(response.error.message || 'Email send failed');
-    }
-    
-    const messageId = response.data?.id || 'email-sent';
     console.log('✅ Order notification email sent:', messageId);
-    
     return { 
       success: true, 
       messageId: messageId,
-      fullResponse: response.data
+      fullResponse: info 
     };
+
+  } catch (error) {
+    console.error('❌ Error sending email:', error);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      statusCode: error.statusCode
+    });
+    return { success: false, error: error.message };
+  }
+}
 //
 // Helper: createCatalogItemWithImage (unchanged)
 //
