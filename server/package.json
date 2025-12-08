@@ -18,8 +18,8 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.10",
-    "resend": "^6.4.2",
+    "nodemailer": "^7.0.11",
+    "resend": "^6.5.2",
     "square": "^35.0.0"
   },
   "devDependencies": {
