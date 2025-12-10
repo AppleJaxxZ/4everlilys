@@ -25,6 +25,10 @@ function Home() {
             <Link to="/build-custom" className="cta-button cta-secondary">
               🎨 Build Your Custom Gift
             </Link>
+            <div className="cta-divider">or</div>
+            <Link to="/photo-gallery" className="cta-button cta-secondary">
+              📸 Photo Gallery
+            </Link>
           </div>
         </div>
       </section>
@@ -32,22 +36,22 @@ function Home() {
       <section className="features-section">
         <div className="features-container">
           <div className="feature-card">
-            <div className="feature-icon">🪚</div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_3969.JPG'/></div>
             <h3>Custom Designs</h3>
             <p>Choose from multiple gift options and customizations</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">📏</div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_2107.jpg'/></div>
             <h3>Multiple Sizes</h3>
             <p>Select the perfect size for your gift from our range of options</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🌈</div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_3967.JPG'/></div>
             <h3>Wood Options</h3>
             <p>Pick your favorite wood to make your gift truly unique</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">✨</div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_6310.jpeg'/></div>
             <h3>Handcrafted Quality</h3>
             <p>Each piece is carefully crafted with attention to detail. NO TWO pieces are exactly the same!</p>
           </div>

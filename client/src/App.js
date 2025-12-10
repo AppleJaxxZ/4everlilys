@@ -14,6 +14,7 @@ import Contact from './pages/ContactUs/Contact.page';
 import Gallery from './pages/Gallery-Shop/Gallery-Shop.page';
 import OrderConfirmation from './pages/OrderConfirmation/OrderConfirmation.page';
 import ItemDetail from './components/ItemDetail/ItemDetail.component';
+import PastImages from './pages/PastImages/PastImages.pages';
 import './App.css';
 
 // ✅ Constants
@@ -193,6 +194,14 @@ function App() {
                 cart={cart} 
                 user={user}
                 getCartTotal={getCartTotal}
+              />
+            } 
+          />
+
+<Route 
+            path="/photo-gallery" 
+            element={
+              <PastImages
               />
             } 
           />

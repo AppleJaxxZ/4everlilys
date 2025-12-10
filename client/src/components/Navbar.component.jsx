@@ -55,6 +55,14 @@ function Navbar({ user, cartCount }) {
               Shop Gallery
             </Link>
           </li>
+
+          <li className="nav-item">
+            <Link to="/photo-gallery" className="nav-link" onClick={closeMenu}>
+            📸 Photo Gallery
+            </Link>
+          </li>
+
+
           <li className="nav-item">
             <Link to="contact" className="nav-link" onClick={closeMenu}>Contact Us</Link>
 
@@ -64,6 +72,8 @@ function Navbar({ user, cartCount }) {
             🛒 Cart ({cartCount})
             </Link>
           </li>
+
+          
           {user ? (
             <>
               <li className="nav-item">
