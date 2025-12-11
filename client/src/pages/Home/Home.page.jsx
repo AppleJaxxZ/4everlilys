@@ -36,17 +36,17 @@ function Home() {
       <section className="features-section">
         <div className="features-container">
           <div className="feature-card">
-            <div className="feature-icon"><img src='/images/gifts/IMG_3969.JPG' alt="Homepage Cutting board image"/></div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_3969.JPG' alt="Homepage Cutting board"/></div>
             <h3>Custom Designs</h3>
             <p>Choose from multiple gift options and customizations</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon"><img src='/images/gifts/IMG_2107.jpg' alt="Homepage Cutting board image"/></div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_2107.jpg' alt="Homepage Cutting board"/></div>
             <h3>Multiple Sizes</h3>
             <p>Select the perfect size for your gift from our range of options</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon"><img src='/images/gifts/IMG_3967.JPG' alt="Homepage Cutting board image"/></div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_3967.JPG' alt="Homepage Cutting board"/></div>
             <h3>Wood Options</h3>
             <p>Pick your favorite wood to make your gift truly unique</p>
           </div>
