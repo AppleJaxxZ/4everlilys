@@ -28,7 +28,7 @@ function PastImages() {
       <div className="gallery-header">
         <h1>Masterpieces Of The Past</h1>
         <p>See something you want too?  Email us the image and well craft an original piece just for you! </p><br/>
-        <p><a href={`mailto: 4everlilyswc@gmail.com`}></a></p>
+        <p><a href={`mailto: 4everlilyswc@gmail.com`} aria-label="4everlilys email link">4EverLilys Email</a></p>
         
       </div>
 
