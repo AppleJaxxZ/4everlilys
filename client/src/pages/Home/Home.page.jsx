@@ -51,7 +51,7 @@ function Home() {
             <p>Pick your favorite wood to make your gift truly unique</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon"><img src='/images/gifts/IMG_6310.jpeg' alt="Homepage Cutting board image"/></div>
+            <div className="feature-icon"><img src='/images/gifts/IMG_6310.jpeg' alt="Homepage Cutting board"/></div>
             <h3>Handcrafted Quality</h3>
             <p>Each piece is carefully crafted with attention to detail. NO TWO pieces are exactly the same!</p>
           </div>
