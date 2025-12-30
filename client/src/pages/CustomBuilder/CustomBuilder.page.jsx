@@ -344,6 +344,7 @@ function CustomBuilder({ addToCart }) {
                   <div className="gift-image-container">
                     <img 
                       src={gift.image} 
+                      loading='lazy'
                       alt={gift.name}
                       onError={(e) => {
                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e8e8e8" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E' + gift.name + '%3C/text%3E%3C/svg%3E';
@@ -376,6 +377,7 @@ function CustomBuilder({ addToCart }) {
                     <div className="size-image-container">
                       <img 
                         src={size.image} 
+                        loading='lazy'
                         alt={size.name}
                         onError={(e) => {
                           e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e8e8e8" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E' + size.name + '%3C/text%3E%3C/svg%3E';
@@ -428,6 +430,7 @@ function CustomBuilder({ addToCart }) {
                   <div className="wood-image-container">
                     <img 
                       src={wood.image} 
+                      loading='lazy'
                       alt={wood.name}
                       onError={(e) => {
                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e8e8e8" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E' + wood.name + '%3C/text%3E%3C/svg%3E';
@@ -470,6 +473,7 @@ function CustomBuilder({ addToCart }) {
                     <img 
                       src={option.image} 
                       alt={option.name}
+                      loading='lazy'
                       onError={(e) => {
                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e8e8e8" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E' + option.name + '%3C/text%3E%3C/svg%3E';
                       }}
@@ -506,6 +510,7 @@ function CustomBuilder({ addToCart }) {
                     <img 
                       src={handleType.image} 
                       alt={handleType.name}
+                      loading='lazy'
                       onError={(e) => {
                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e8e8e8" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E' + handleType.name + '%3C/text%3E%3C/svg%3E';
                       }}
@@ -614,6 +619,7 @@ function CustomBuilder({ addToCart }) {
                   <img 
                     src={selectedGift.image} 
                     alt={selectedGift.name}
+                    loading='lazy'
                     onError={(e) => {
                       e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23e8e8e8" width="300" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
                     }}
@@ -623,13 +629,13 @@ function CustomBuilder({ addToCart }) {
                 <div className="component-previews">
                   {selectedWood && (
                     <div className="component-preview">
-                      <img src={selectedWood.image} alt={selectedWood.name} />
+                      <img src={selectedWood.image} alt={selectedWood.name} loading='lazy' />
                       <p>{selectedWood.name}</p>
                     </div>
                   )}
                   {selectedDesigns[0] && (
                     <div className="component-preview">
-                      <img src={selectedDesigns[0].image} alt={selectedDesigns[0].name} />
+                      <img src={selectedDesigns[0].image} alt={selectedDesigns[0].name} loading='lazy' />
                       <p>{selectedDesigns[0].name}</p>
                     </div>
                   )}
