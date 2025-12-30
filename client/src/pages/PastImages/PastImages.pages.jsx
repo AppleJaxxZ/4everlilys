@@ -30,7 +30,7 @@ function PastImages() {
       </div>
 
       <div className="photo-gallery-grid">
-        {mediaFiles.map((media, index) => (
+        {[...mediaFiles].reverse().map((media, index) => (
           <div 
             key={index} 
             className="gallery-image-wrapper"
