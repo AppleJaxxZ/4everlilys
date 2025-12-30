@@ -35,7 +35,41 @@
     margin: 0 auto;
     padding: 0 20px;
   }
-  
+  /* Image ID Badge - Gallery View */
+.image-id-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(139, 115, 85, 0.95);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  pointer-events: none;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* Image ID Badge - Lightbox View (larger) */
+.lightbox-id-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(139, 115, 85, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.3rem;
+  z-index: 1002;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
   /* Gallery Image/Video Wrapper */
   .gallery-image-wrapper {
     position: relative;

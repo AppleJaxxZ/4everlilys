@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import mediaFiles from '../../data/mediaList'; // ← Import the list
+import mediaFiles from '../../data/mediaList';
 import './PastImages.css';
 
 function PastImages() {
   const [selectedMedia, setSelectedMedia] = useState(null);
-
-  // Now using imported mediaFiles instead of hardcoding
 
   const openLightbox = (media) => {
     setSelectedMedia(media);
@@ -27,9 +25,8 @@ function PastImages() {
     <div className="photo-gallery-container">
       <div className="gallery-header">
         <h1>Masterpieces Of The Past</h1>
-        <p>See something you want too?  Email us the image and well craft an original piece just for you! </p><br/>
-        <p><a href={`mailto: 4everlilyswc@gmail.com`} aria-label="4everlilys email link">4EverLilys Email</a></p>
-        
+        <p>See something you want too? Email us the <strong>image number</strong> and we'll craft an original piece just for you!</p><br/>
+        <p><a href="mailto:4everlilyswc@gmail.com" aria-label="4everlilys email link">4EverLilys Email</a></p>
       </div>
 
       <div className="photo-gallery-grid">
@@ -37,8 +34,11 @@ function PastImages() {
           <div 
             key={index} 
             className="gallery-image-wrapper"
-            onClick={() => openLightbox(media)}
+            onClick={() => openLightbox({ ...media, index })}
           >
+            {/* ✅ Display Index Number */}
+            <div className="image-id-badge">#{index}</div>
+
             {media.type === 'video' ? (
               <>
                 <video 
@@ -54,7 +54,7 @@ function PastImages() {
             ) : (
               <img 
                 src={media.src} 
-                alt={`Gallery item ${index + 1}`}
+                alt={`Gallery item #${index}`}
                 loading="lazy"
               />
             )}
@@ -73,6 +73,10 @@ function PastImages() {
           <button className="lightbox-close" onClick={closeLightbox}>
             ✕
           </button>
+          
+          {/* ✅ Display Index Number in Lightbox */}
+          <div className="lightbox-id-badge">#{selectedMedia.index}</div>
+
           {selectedMedia.type === 'video' ? (
             <video 
               src={selectedMedia.src} 
@@ -83,7 +87,7 @@ function PastImages() {
           ) : (
             <img 
               src={selectedMedia.src} 
-              alt="Full size view" 
+              alt={`Full size view - #${selectedMedia.index}`}
               className="lightbox-image"
             />
           )}

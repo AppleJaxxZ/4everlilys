@@ -40,60 +40,88 @@ console.log(process.env.NODE_ENV);
 // Helper: Send order notification email
 //
 async function sendOrderNotificationEmail({ paymentId, amount, items, shippingInfo, orderDate }) {
-  // Add this helper function at the top of sendOrderNotificationEmail
-function preventLinking(text) {
-  // Convert each character to HTML entity
-  return text.split('').map(char => {
-    if (char === ' ') return '&nbsp;';
-    return `&#${char.charCodeAt(0)};`;
-  }).join('');
-}
+  // Helper to prevent email clients from auto-linking addresses
+  function preventLinking(text) {
+    return text.split('').map(char => {
+      if (char === ' ') return '&nbsp;';
+      return `&#${char.charCodeAt(0)};`;
+    }).join('');
+  }
+
   try {
-    // Check environment variables
     if (!process.env.RESEND_API_KEY) {
       console.error('❌ RESEND_API_KEY is not set!');
-      return { success: false, error: 'Email service not configured - missing API key' };
+      return { success: false, error: 'Email service not configured' };
     }
 
-    // --- 1. Fetch full payment details from Square ---
+    // Fetch payment details
     const { result } = await client.paymentsApi.getPayment(paymentId);
     const payment = result.payment;
-
     if (!payment) throw new Error('Payment not found in Square');
 
-    console.log('📧 Sending order email with:', shippingInfo);
+    console.log('📧 Preparing order email...');
 
-    // --- 2. Format order items ---
+    // --- Build items list with EMBEDDED images ---
     const itemsList = items.map(item => {
       let details = `
-        <li style="margin-bottom:15px;padding:10px;background:#f5f5f5;border-radius:5px;">
-          <strong>${item.name}</strong><br>
-          Quantity: ${item.quantity}<br>
-          Price: $${(item.totalPrice || item.price).toFixed(2)} each<br>
-          Subtotal: $${((item.totalPrice || item.price) * item.quantity).toFixed(2)}<br>`;
+        <li style="margin-bottom:20px;padding:15px;background:#f9f9f9;border-radius:8px;border-left:4px solid #8b7355;">`;
+
+      // ✅ EMBED IMAGE if it exists (using full Netlify URL)
+      if (item.imagePath && item.imagePath !== '/images/placeholder.jpg') {
+        const imageUrl = `https://4everlilys.netlify.app${item.imagePath}`;
+        details += `
+          <img 
+            src="${imageUrl}" 
+            alt="${item.name}" 
+            style="
+              max-width:300px;
+              height:auto;
+              border-radius:8px;
+              margin-bottom:15px;
+              display:block;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            " 
+          />`;
+      }
+
+      details += `
+          <div style="font-size:1.1em;margin-bottom:8px;">
+            <strong style="color:#2c3e50;">${item.name}</strong>
+          </div>
+          <div style="color:#555;line-height:1.6;">
+            <strong>Quantity:</strong> ${item.quantity}<br>
+            <strong>Price:</strong> $${(item.totalPrice || item.price).toFixed(2)} each<br>
+            <strong>Subtotal:</strong> $${((item.totalPrice || item.price) * item.quantity).toFixed(2)}
+          </div>`;
       
       // Custom Builder items
       if (item.gift || item.size || item.wood) {
-        details += `<br><strong>Custom Configuration:</strong><br>`;
-        if (item.gift?.name) details += `Type: ${item.gift.name}<br>`;
-        if (item.size?.name) details += `Size: ${item.size.name}<br>`;
-        if (item.wood?.name) details += `Wood: ${item.wood.name}<br>`;
-        if (item.handle?.name) details += `Handle: ${item.handle.name}<br>`;
-        if (item.handleType?.name) details += `Handle Type: ${item.handleType.name}<br>`;
-        if (item.designs?.[0]?.name) details += `Design: ${item.designs[0].name}<br>`;
+        details += `<div style="margin-top:12px;padding:10px;background:#fff;border-radius:5px;">
+          <strong style="color:#8b7355;">Custom Configuration:</strong><br>`;
+        if (item.gift?.name) details += `<span style="color:#666;">Type:</span> ${item.gift.name}<br>`;
+        if (item.size?.name) details += `<span style="color:#666;">Size:</span> ${item.size.name}<br>`;
+        if (item.wood?.name) details += `<span style="color:#666;">Wood:</span> ${item.wood.name}<br>`;
+        if (item.handle?.name) details += `<span style="color:#666;">Handle:</span> ${item.handle.name}<br>`;
+        if (item.handleType?.name) details += `<span style="color:#666;">Handle Type:</span> ${item.handleType.name}<br>`;
+        if (item.designs?.[0]?.name) details += `<span style="color:#666;">Design:</span> ${item.designs[0].name}<br>`;
+        details += `</div>`;
       } 
       // Gallery Shop items
       else {
-        if (item.category) details += `<br><strong>Category:</strong> ${item.category}<br>`;
-        if (item.type) details += `<strong>Type:</strong> ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}<br>`;
-        if (item.description) details += `<strong>Description:</strong> ${item.description}<br>`;
+        if (item.category || item.type || item.description) {
+          details += `<div style="margin-top:12px;padding:10px;background:#fff;border-radius:5px;">`;
+          if (item.category) details += `<strong style="color:#666;">Category:</strong> ${item.category}<br>`;
+          if (item.type) details += `<strong style="color:#666;">Type:</strong> ${item.type === 'order' ? 'Made to Order' : 'Ready to Ship'}<br>`;
+          if (item.description) details += `<strong style="color:#666;">Description:</strong> ${item.description}<br>`;
+          details += `</div>`;
+        }
       }
       
       details += `</li>`;
       return details;
     }).join('');
 
-    // --- 3. Totals ---
+    // Calculate totals
     const subtotal = items.reduce((sum, i) => sum + ((i.totalPrice || i.price) * i.quantity), 0);
     const tax = subtotal * 0.06;
     const total = (amount / 100).toFixed(2);
@@ -107,17 +135,104 @@ function preventLinking(text) {
       minute: '2-digit'
     });
 
-    // --- 4. Email HTML ---
+    // --- Email HTML with embedded images ---
     const emailContent = `
+      <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { font-family: Arial; line-height:1.6; color:#333; }
-          .container { max-width:600px; margin:0 auto; padding:20px; }
-          .header { background:#2c3e50; color:white; padding:20px; border-radius:5px 5px 0 0; }
-          .content { background:white; padding:20px; border:1px solid #ddd; }
-          ul { list-style:none; padding:0; }
-          .footer { background:#f5f5f5; padding:15px; text-align:center; border-radius:0 0 5px 5px; }
+          body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+          }
+          .container { 
+            max-width: 650px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          }
+          .header { 
+            background: linear-gradient(135deg, #8b7355 0%, #6d5a44 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+          }
+          .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+          }
+          .content { 
+            padding: 30px;
+          }
+          .info-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #8b7355;
+          }
+          .info-section h2 {
+            margin-top: 0;
+            color: #8b7355;
+            font-size: 18px;
+          }
+          ul { 
+            list-style: none;
+            padding: 0;
+            margin: 0;
+          }
+          .totals-box {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+          }
+          .totals-box p {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+          }
+          .totals-box .total-line {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #8b7355;
+            border-top: 2px solid #8b7355;
+            padding-top: 12px;
+            margin-top: 12px;
+          }
+          .footer { 
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+          }
+          .footer p {
+            margin: 5px 0;
+          }
+          .return-policy {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+          }
+          .return-policy h3 {
+            margin-top: 0;
+            color: #856404;
+          }
         </style>
       </head>
       <body>
@@ -126,51 +241,74 @@ function preventLinking(text) {
             <h1>🎉 New Order Received!</h1>
             <p>Payment Confirmed - Ready for Processing</p>
           </div>
+          
           <div class="content">
-            <h2>Order Information</h2>
-            <p><strong>Date:</strong> ${formattedDate}</p>
-            <p><strong>Payment ID:</strong> ${paymentId}</p>
-            <p><strong>Status:</strong> ✅ ${payment.status}</p>
-            
-            
-            <h2>Customer</h2>
-            <p>${shippingInfo.firstName} ${shippingInfo.lastName}<br>
-               ${shippingInfo.email}<br>${shippingInfo.phone}</p>
+            <div class="info-section">
+              <h2>📋 Order Information</h2>
+              <p><strong>Date:</strong> ${formattedDate}</p>
+              <p><strong>Payment ID:</strong> ${paymentId}</p>
+              <p><strong>Status:</strong> ✅ ${payment.status}</p>
+            </div>
             
             <div class="info-section">
-  <h2 style="margin-top:0;">📦 Shipping Address</h2>
-  <div style="font-family:monospace; background:#fff; padding:10px; border:1px solid #ddd; border-radius:4px;">
-    ${preventLinking(shippingInfo.address)}<br>
-    ${shippingInfo.apartment ? preventLinking(shippingInfo.apartment) + '<br>' : ''}
-    ${preventLinking(shippingInfo.city + ', ' + shippingInfo.state + ' ' + shippingInfo.zipCode)}<br>
-    ${preventLinking(shippingInfo.country)}
-  </div>
-</div>
+              <h2>👤 Customer Information</h2>
+              <p><strong>${shippingInfo.firstName} ${shippingInfo.lastName}</strong></p>
+              <p>📧 ${shippingInfo.email}</p>
+              <p>📱 ${shippingInfo.phone}</p>
+            </div>
+            
+            <div class="info-section">
+              <h2>📦 Shipping Address</h2>
+              <div style="font-family:monospace; background:#fff; padding:12px; border:1px solid #ddd; border-radius:4px;">
+                ${preventLinking(shippingInfo.address)}<br>
+                ${shippingInfo.apartment ? preventLinking(shippingInfo.apartment) + '<br>' : ''}
+                ${preventLinking(shippingInfo.city + ', ' + shippingInfo.state + ' ' + shippingInfo.zipCode)}<br>
+                ${preventLinking(shippingInfo.country)}
+              </div>
+            </div>
 
-            <h2>Items (${items.length})</h2>
+            <h2 style="color:#8b7355;border-bottom:2px solid #8b7355;padding-bottom:10px;">
+              🛒 Items Ordered (${items.length})
+            </h2>
             <ul>${itemsList}</ul>
 
-            <h3>Totals</h3>
-            <p>Subtotal: $${subtotal.toFixed(2)}</p>
-            <p>Tax (6%): $${tax.toFixed(2)}</p>
-            <p><strong>Total Paid: $${total}</strong></p>
+            <div class="totals-box">
+              <p>
+                <span>Subtotal:</span>
+                <span>$${subtotal.toFixed(2)}</span>
+              </p>
+              <p>
+                <span>Tax (6%):</span>
+                <span>$${tax.toFixed(2)}</span>
+              </p>
+              <p class="total-line">
+                <span>TOTAL PAID:</span>
+                <span>$${total}</span>
+              </p>
+            </div>
             
-            <h3>RETURN POLICY</h3>
-            <p>All sales are final. There are no refunds on any items from 4Everlilys unless your order is canceled within 24 hours.</p>
+            <div class="return-policy">
+              <h3>⚠️ RETURN POLICY</h3>
+              <p style="margin:0;">
+                All sales are final. There are no refunds on any items from 4EverLilys 
+                unless your order is canceled within 24 hours of purchase.
+              </p>
+            </div>
           </div>
 
           <div class="footer">
             <p>Order received on ${formattedDate}</p>
-            <p>4EverLilys Wood Crafts</p>
+            <p><strong>4EverLilys Wood Crafts</strong></p>
+            <p>Handcrafted with care 🪵✨</p>
           </div>
         </div>
       </body>
       </html>
     `;
 
-    const subject = `New Order - ${shippingInfo.firstName} ${shippingInfo.lastName} - $${total}`;
+    const subject = `🛒 New Order - ${shippingInfo.firstName} ${shippingInfo.lastName} - $${total}`;
 
-    // --- 5. Send email ---
+    // Send email via Resend
     console.log('📧 Sending email via Resend...');
     
     const info = await resend.emails.send({
@@ -180,26 +318,16 @@ function preventLinking(text) {
       html: emailContent,
     });
 
-    // ✅ FIX: Log the full response to see structure
-    console.log('📧 Resend response:', JSON.stringify(info, null, 2));
+    const messageId = info?.id || info?.data?.id || 'email-sent';
+    console.log('✅ Order email sent with images:', messageId);
 
-    // ✅ FIX: Handle different response structures
-    const messageId = info?.id || info?.data?.id || info?.messageId || 'email-sent-no-id';
-    
-    console.log('✅ Order notification email sent:', messageId);
     return { 
       success: true, 
       messageId: messageId,
-      fullResponse: info 
     };
 
   } catch (error) {
     console.error('❌ Error sending email:', error);
-    console.error('Error details:', {
-      message: error.message,
-      name: error.name,
-      statusCode: error.statusCode
-    });
     return { success: false, error: error.message };
   }
 }
