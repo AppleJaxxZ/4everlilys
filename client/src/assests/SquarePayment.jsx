@@ -109,6 +109,12 @@ function SquarePayment({
         setLoading(true);
         try {
           const preparedItems = prepareItemsForPayment(items);
+          console.log('🖼️ Prepared items for payment:', preparedItems.map(item => ({
+            name: item.name,
+            imagePath: item.imagePath,
+            imageUrl: item.imageUrl,
+            hasImage: !!(item.imagePath || item.imageUrl)
+          })));
           const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
           console.log("🌐 Backend URL:", backendUrl);
 
