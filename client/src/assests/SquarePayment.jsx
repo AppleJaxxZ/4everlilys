@@ -56,14 +56,22 @@ function SquarePayment({
         } else {
           console.warn('Image too large, using URL instead');
           paymentItem.imageUrl = item.imageUrl || item.image;
+          paymentItem.imagePath = item.imagePath || item.image || item.imageUrl;
         }
       } else if (item.imageUrl || item.image) {
         paymentItem.imageUrl = item.imageUrl || item.image;
+        paymentItem.imagePath = item.imagePath || item.image || item.imageUrl;
       }
 
       return paymentItem;
     });
   };
+  console.log('🖼️ Prepared items for payment:', preparedItems.map(item => ({
+    name: item.name,
+    imagePath: item.imagePath,
+    imageUrl: item.imageUrl,
+    hasImage: !!(item.imagePath || item.imageUrl)
+  })));
 
   // ✅ FIX: Use useCallback to memoize the function
   const getFinalBillingInfo = useCallback(() => {

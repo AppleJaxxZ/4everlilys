@@ -35,8 +35,8 @@ export const RAW_GALLERY_DATA = {
       ],
       'floral': [
         { name: 'Black Walnut Floral Cutting Board 26"x12"x1.5" ', price: 275, image: getImageUrl('/images/gallery/forSale/BlackWalnut_Cuttingboard.png') },
-        { name: 'Acacia Floral Cutting Board 19.5"x7.75"x.625" ', price: 275, image: getImageUrl('/images/gallery/byOrder/flower-board/arcadia_cuttingboard.jpeg') },
-        { name: 'Black Cherry Floral Cutting Board 19.5"x7.75"x.625" ', price: 275, image: getImageUrl('/images/gallery/byOrder/flower-board/arcadia_cuttingboard.jpeg') },
+        { name: 'Acacia Floral Cutting Board 19.5"x7.75"x.625" ', price: 75, image: getImageUrl('/images/gallery/byOrder/flower-board/arcadia_cuttingboard.jpeg') },
+        
         
       ],
       'scene-boards': [

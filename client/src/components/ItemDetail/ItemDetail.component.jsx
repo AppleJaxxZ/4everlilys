@@ -29,6 +29,7 @@ function ItemDetail({ addToCart }) {
       category: category,
       imageUrl: item.image,
       image: item.image,
+      imagePath: item.image,
       description: `${category} - ${item.name}`,
       isCustom: false,
       totalPrice: item.price,
