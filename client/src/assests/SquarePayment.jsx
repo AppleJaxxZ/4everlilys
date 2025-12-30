@@ -66,12 +66,7 @@ function SquarePayment({
       return paymentItem;
     });
   };
-  console.log('🖼️ Prepared items for payment:', preparedItems.map(item => ({
-    name: item.name,
-    imagePath: item.imagePath,
-    imageUrl: item.imageUrl,
-    hasImage: !!(item.imagePath || item.imageUrl)
-  })));
+
 
   // ✅ FIX: Use useCallback to memoize the function
   const getFinalBillingInfo = useCallback(() => {
