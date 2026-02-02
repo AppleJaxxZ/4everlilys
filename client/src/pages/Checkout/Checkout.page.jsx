@@ -134,8 +134,10 @@ console.log('🛒 Has wood?', !!validCart[0]?.wood);
                   </div>
                 </div>
                 <div className="badge-card-content">
+                <h5><strong>SHIPPING COST: </strong> SHIPPING COST WILL BE BILLED SEPARATELY ONCE PACKAGE IS READY TO BE SHIPPED</h5>
+                <p><strong>We use ShipPirate to ensure you are getting the absolute lowest prices compared to our competitors.</strong></p>
                   <p><strong>Custom Items:</strong> 2-4 weeks for crafting</p>
-                  <p><strong>Ready-Made:</strong> Ships in 3-5 business days</p>
+                  <p><strong>Ready-Made:</strong> Ships in 3-9 business days</p>
                   <p><strong>Delivery:</strong> 5-7 business days via standard shipping</p>
                   <p className="info-note">📍 Tracking information will be sent via email as soon as your package is shipped.</p>
                 </div>

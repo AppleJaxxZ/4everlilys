@@ -13,10 +13,10 @@ const CATEGORIES = [
   { id: 'scene-boards', name: 'Scene Cutting Boards', icon: '🌌' },
   { id: 'river-boards', name: 'River Boards', icon: '🦦' },
   { id: 'tables', name: 'Tables', icon: '💧' },
-  { id: 'skulls', name: 'Skulls', icon: '💀' },
-  { id: 'animals', name: 'Animals', icon: '🦅' },
+  // { id: 'skulls', name: 'Skulls', icon: '💀' },
+  // { id: 'animals', name: 'Animals', icon: '🦅' },
   { id: 'coasters', name: 'Coasters', icon: '🍹' },
-  { id: 'bathroom-set', name: 'Bathroom Sets', icon: '🛀' },
+  // { id: 'bathroom-set', name: 'Bathroom Sets', icon: '🛀' },
   { id: 'holidays', name: 'Holidays', icon: '🎊' },
   { id: 'other', name: 'Other', icon: '✨' },
 ];
@@ -24,11 +24,7 @@ const CATEGORIES = [
 function GalleryShop({ addToCart }) {
   const navigate = useNavigate();
   
-  // ✅ Load from sessionStorage or default to index 4
-  const [activeSection, setActiveSection] = useState(() => {
-    return sessionStorage.getItem('gallerySection') || 'available-order';
-  });
-  
+  // Load from sessionStorage or default to index 4
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(() => {
     const saved = sessionStorage.getItem('galleryCategoryIndex');
     return saved !== null ? parseInt(saved, 10) : 4;
@@ -37,17 +33,13 @@ function GalleryShop({ addToCart }) {
   const [showModal, setShowModal] = useState(false);
   const [addedItem, setAddedItem] = useState(null);
 
-  // ✅ Save to sessionStorage whenever they change
-  useEffect(() => {
-    sessionStorage.setItem('gallerySection', activeSection);
-  }, [activeSection]);
-
+  // Save to sessionStorage whenever it changes
   useEffect(() => {
     sessionStorage.setItem('galleryCategoryIndex', activeCategoryIndex);
   }, [activeCategoryIndex]);
 
   const activeCategory = CATEGORIES[activeCategoryIndex];
-  const items = GALLERY_DATA[activeSection][activeCategory.id] || [];
+  const items = GALLERY_DATA[activeCategory.id] || [];
 
   const handleCategoryClick = (index) => {
     setActiveCategoryIndex(index);
@@ -66,13 +58,14 @@ function GalleryShop({ addToCart }) {
       ...item,
       id: `gallery-${Date.now()}`,
       quantity: 1,
-      type: activeSection === 'available-order' ? 'order' : 'sale',
+      type: item.availability === 'For Sale' ? 'sale' : 'order',
       category: activeCategory.name,
       imageUrl: item.image,
       image: item.image,
       description: `${activeCategory.name} - ${item.name}`,
       isCustom: false,
       totalPrice: item.price,
+      availability: item.availability,
     };
     
     addToCart(cartItem);
@@ -92,37 +85,13 @@ function GalleryShop({ addToCart }) {
 
   return (
     <div className="gallery-page">
-      {/* Persistent Banner Indicator */}
-      <div className={`banner-indicator ${activeSection === 'available-order' ? 'banner-order' : 'banner-sale'}`}>
-        <span className="banner-icon">
-          {activeSection === 'available-order' ? '📦' : '🛒'}
-        </span>
-        <span className="banner-text">
-          You are browsing: {activeSection === 'available-order' ? 'Available by Order' : 'Available Items For Sale'}
-        </span>
-      </div>
-
       <div className="gallery-header">
         <h1>Our Gallery</h1>
-        <p>Browse our collection of handcrafted woodwork </p> <br/> Click Available By Order: <br/> 
-        The item is not yet made but will be ordered and added to a que of items to be built<br/> ____________ <br/> <br/>
-        Available Items For Sale: <br/> Items are already made and will be shipped to you as the image shows
-      </div>
-
-      {/* Section Toggle */}
-      <div className="section-toggle">
-        <button
-          className={`section-btn ${activeSection === 'available-order' ? 'active' : ''}`}
-          onClick={() => setActiveSection('available-order')}
-        >
-          Available by Order
-        </button>
-        <button
-          className={`section-btn ${activeSection === 'for-sale' ? 'active' : ''}`}
-          onClick={() => setActiveSection('for-sale')}
-        >
-          Available Items For Sale
-        </button>
+        <p>Browse our collection of handcrafted woodwork</p>
+        <br/>
+        <p><strong>For Sale & By Order Only</strong> </p><br/> <p> BUY NOW items are already made and ready to be shipped.</p> <br/>
+        <p> ORDER NOW items are not made yet and will require more time until it reaches you.  </p>
+        
       </div>
 
       {/* Category Carousel */}
@@ -175,7 +144,6 @@ function GalleryShop({ addToCart }) {
                   state: {
                     item: item,
                     category: activeCategory.name,
-                    section: activeSection
                   }
                 })}
                 style={{ cursor: 'pointer' }}
@@ -189,6 +157,10 @@ function GalleryShop({ addToCart }) {
                       e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23e8e8e8" width="300" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E' + item.name + '%3C/text%3E%3C/svg%3E';
                     }}
                   />
+                  {/* Availability Tag */}
+                  <div className={`availability-tag ${item.availability === 'For Sale' ? 'tag-sale' : 'tag-order'}`}>
+                    {item.availability}
+                  </div>
                 </div>
                 <div className="item-details">
                   <h3>{item.name}</h3>
@@ -200,7 +172,7 @@ function GalleryShop({ addToCart }) {
                       handleAddToCart(item);
                     }}
                   >
-                    {activeSection === 'available-order' ? 'Order And Pay Now' : 'Buy Now'}
+                    {item.availability === 'For Sale' ? 'Buy Now' : 'Order And Pay Now'}
                   </button>
                 </div>
               </div>
@@ -213,10 +185,17 @@ function GalleryShop({ addToCart }) {
       {showModal && (
         <div className="modal-overlay" onClick={handleContinueShopping}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">✔</div>
+            <div className="modal-icon">✓</div>
             <h2>Item Added to Shopping Cart</h2>
             {addedItem && (
-              <p className="modal-item-name">{addedItem.name} - ${addedItem.price}</p>
+              <>
+                <p className="modal-item-name">{addedItem.name} - ${addedItem.price}</p>
+                <p className="modal-availability">
+                  {addedItem.availability === 'For Sale' 
+                    ? 'Ready to ship!' 
+                    : 'Will be added to build queue'}
+                </p>
+              </>
             )}
             <div className="modal-buttons">
               <button className="continue-btn" onClick={handleContinueShopping}>

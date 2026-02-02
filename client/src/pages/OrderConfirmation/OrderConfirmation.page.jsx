@@ -144,6 +144,7 @@ const OrderConfirmation = () => {
             <li>✓ Customer will receive confirmation at {shippingInfo?.email}</li>
             <li>✓ Order saved to your dashboard</li>
             <li>✓ We'll begin crafting your custom items</li>
+            <li>✓ Once the order is complete and ready to ship we will email you a link for a one time payment to cover the shipping cost.</li>
           </ul>
         </div>
       </div>

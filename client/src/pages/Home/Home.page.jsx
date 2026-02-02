@@ -21,10 +21,10 @@ function Home() {
             <Link to="/gallery-shop" className="cta-button cta-primary">
               🛍️ Shop Ready-Made Crafts
             </Link>
-            <div className="cta-divider">or</div>
+            {/* <div className="cta-divider">or</div>
             <Link to="/build-custom" className="cta-button cta-secondary">
               🎨 Build Your Custom Gift
-            </Link>
+            </Link> */}
             <div className="cta-divider">or</div>
             <Link to="/photo-gallery" className="cta-button cta-secondary">
               📸 Photo Gallery

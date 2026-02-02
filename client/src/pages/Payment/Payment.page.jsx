@@ -201,8 +201,10 @@ function Payment({ cart, user, clearCart, getCartTotal }) {
                   </div>
                 </div>
                 <div className="badge-card-content">
+                <h5><strong>SHIPPING COST: </strong> SHIPPING COST WILL BE BILLED SEPARATELY ONCE PACKAGE IS READY TO BE SHIPPED</h5>
+                <p><strong>We use ShipPirate to ensure you are getting the absolute lowest prices compared to our competitors.</strong></p>
                   <p><strong>Custom Items:</strong> 2-4 weeks for crafting</p>
-                  <p><strong>Ready-Made:</strong> Ships in 3-5 business days</p>
+                  <p><strong>Ready-Made:</strong> Ships in 3-9 business days</p>
                   <p><strong>Delivery:</strong> 5-7 business days via standard shipping</p>
                   <p className="info-note">📍 Tracking information provided with all orders as soon as your package is shipped.</p>
                 </div>
@@ -213,12 +215,12 @@ function Payment({ cart, user, clearCart, getCartTotal }) {
                   <div className="badge-icon-circle refund-icon">✓</div>
                   <div className="badge-title-group">
                     <h3>Quality Guarantee</h3>
-                    <p className="badge-subtitle">30-day refund policy</p>
+                    <p className="badge-subtitle">No Refunds</p>
                   </div>
                 </div>
                 <div className="badge-card-content">
-                  <p><strong>30-Day Money-Back Guarantee:</strong> Not satisfied? Return your non-custom item within 30 days for a full refund.</p>
-                  <p className="info-note">⚠️ Custom/personalized items are non-refundable. Items must be unused and in original packaging.</p>
+                  <p><strong>No Refunds Unless Approved By 4EverLilys:</strong> .</p>
+                  <p className="info-note">⚠️ Most Items are Non-Refundable.</p>
                 </div>
               </div>
             </div>
@@ -304,6 +306,10 @@ function Payment({ cart, user, clearCart, getCartTotal }) {
                     <span>Processing Fee</span>
                     <span>${feeBreakdown.squareFee}</span>
                   </div>
+                  <div className="summary-row">
+                    <span>Shipping Fee</span>
+                    <span>Shipping Billed Separately!</span>
+                  </div>
                   <div className="summary-divider"></div>
                   <div className="summary-row total">
                     <span>Total</span>
@@ -323,6 +329,10 @@ function Payment({ cart, user, clearCart, getCartTotal }) {
                   <div className="summary-row">
                     <span>Processing Fee</span>
                     <span>~${((calculateTotal() * 1.06) * 0.029 + 0.30).toFixed(2)}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Shipping Fee</span>
+                    <span>Shipping Billed Separately!</span>
                   </div>
                   <div className="summary-divider"></div>
                   <div className="summary-row total">

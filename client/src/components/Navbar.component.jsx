@@ -45,20 +45,20 @@ function Navbar({ user, cartCount }) {
               Home
             </Link>
           </li>
-          <li className="nav-item">
+          {/* <li className="nav-item">
             <Link to="/build-custom" className="nav-link" onClick={closeMenu}>
               Build Custom Gift
             </Link>
-          </li>
+          </li> */}
           <li className="nav-item">
             <Link to="/gallery-shop" className="nav-link" onClick={closeMenu}>
-              Shop Gallery
+              Shop Our Inventory
             </Link>
           </li>
 
           <li className="nav-item">
             <Link to="/photo-gallery" className="nav-link" onClick={closeMenu}>
-            📸 Photo Gallery
+            📸 Shop Past Custom Orders
             </Link>
           </li>
 

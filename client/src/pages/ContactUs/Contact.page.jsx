@@ -5,7 +5,7 @@ import './Contact.css';
 const Contact = () => {
   // You can update these with your actual contact information
   const contactInfo = {
-    phone: '+1 (555) 123-4567',
+    phone: '+1 (835)-204-2961',
     email: '4everlilyswc@gmail.com',
     facebook: 'facebook.com/4everlilys',
     instagram: '@yourcompany',
@@ -24,7 +24,7 @@ const Contact = () => {
             <MessageCircle className="message-icon" />
             <p className="message-text">
               Have a customized project you'd like to build?  Please email us your projects ideas and we'll come help you create a customized creation we know you'll love! 
-               <br/>Include the size, shape, colors, styles, wood type, and any other details you can think of. 
+               <br/>Include the size, shape, colors, styles, wood type, and any other details you can think of. Average response time is 24 hours. <br/> Text or call us.  If we do not answer your call please leave a detailed voicemail!
             </p>
           </div>
         </div>

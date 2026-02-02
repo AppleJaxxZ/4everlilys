@@ -134,7 +134,7 @@ function ItemDetail({ addToCart }) {
                   <li>✓ Premium quality materials</li>
                   <li>✓ Unique design</li>
                   {section === 'available-order' && <li>⏱ Custom made: 2-4 weeks</li>}
-                  {section === 'for-sale' && <li>🚚 Ships in 3-5 business days</li>}
+                  {section === 'for-sale' && <li>🚚 Ships in 3-9 business days</li>}
                 </ul>
               </div>
 
@@ -173,7 +173,9 @@ function ItemDetail({ addToCart }) {
               <div className="additional-info">
                 <div className="info-item">
                   <strong>🚚 Shipping:</strong>
-                  <span>Free shipping on orders over $100</span>
+                  <span>We use ShipPirate to keep our prices incredibly lower than that other other crafters and websites.  Shipping costs vary by weight, size, and distance.
+                    You will be charged shipping once we can determine the size, weight, and distance of the package.  
+                  </span>
                 </div>
                 <div className="info-item">
                   <strong>↩️ Returns:</strong>
