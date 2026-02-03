@@ -319,12 +319,7 @@ export const RAW_GALLERY_DATA = {
     { name: '4 count - Octagon Wave Coaster 3.5" wide', price: 40, image: getImageUrl('/images/gallery/forSale/coasters/20260130_140034.jpg'), availability: 'For Sale' },
     { name: '5 Pack Square Wave Coaster 3.5"', price: 50, image: getImageUrl('/images/gallery/forSale/coasters/20260130_135841.jpg'), availability: 'For Sale' },
     { name: '4 pack Round Flower Coasters 3.5"', price: 40, image: getImageUrl('/images/gallery/forSale/coasters/20251116_132221.jpg'), availability: 'By Order Only' },
-  ],
-  'bathroom-set': [
-    // By Order Items
-    { name: 'Custom Coaster Set', price: 40, image: getImageUrl('/images/gallery/other1.jpg'), availability: 'By Order Only' },
-    { name: 'Wine Rack', price: 120, image: getImageUrl('/images/gallery/other2.jpg'), availability: 'By Order Only' },
-    { name: 'Wine Rack', price: 120, image: getImageUrl('/images/gallery/other2.jpg'), availability: 'By Order Only' },
+  
   ],
   'holidays': [
     // By Order Items
@@ -332,5 +327,8 @@ export const RAW_GALLERY_DATA = {
     { name: 'Wine Rack', price: 120, image: getImageUrl('/images/gallery/other2.jpg'), availability: 'By Order Only' },
     { name: 'Wine Rack', price: 120, image: getImageUrl('/images/gallery/other2.jpg'), availability: 'By Order Only' },
   ],
-  'other': [],
+  'other': [
+    { name: 'Sea Shell Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131709.jpg'), availability: 'For Sale' },
+    { name: 'Floral Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131717.jpg'), availability: 'For Sale' },
+  ],
 };
