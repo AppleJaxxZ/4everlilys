@@ -240,6 +240,10 @@ async function sendOrderNotificationEmail({ paymentId, amount, items, shippingIn
           <div class="header">
             <h1>🎉 New Order Received!</h1>
             <p>Payment Confirmed - Ready for Processing</p>
+            <h1><Next Step:</h1>
+            <p>Your Order is being processed and crafted!  When your order is complete we will take the dimensions and your address to figure out shipping costs.
+            We do this separately to keep prices as low as possible for our customers.  Once we get a quote on shipment cost we will send you an email link to pay the balance.
+            Once that balance is paid we can ship your order!  Thank you for your business, we know your going to love your new masterpiece! 
           </div>
           
           <div class="content">
