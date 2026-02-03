@@ -1,3 +1,4 @@
+import { get } from 'http';
 import { getImageUrl } from '../../utilities/getImageUrl';
 
 export const RAW_GALLERY_DATA = {
@@ -330,5 +331,8 @@ export const RAW_GALLERY_DATA = {
   'other': [
     { name: 'Sea Shell Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131709.jpg'), availability: 'For Sale' },
     { name: 'Floral Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131717.jpg'), availability: 'For Sale' },
+    { name: 'Trinket Trays  1pc', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131625(1).jpg'), availability: 'For Sale', images: [
+      getImageUrl('/images/gallery/forSale/bathroom/20251116_131610.jpg', getImageUrl('/images/gallery/forSale/bathroom/20251116_131509.jpg'))
+    ], description: 'Many various trinket tray styles.  Per 1 is 25$.'},
   ],
 };
