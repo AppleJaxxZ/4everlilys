@@ -51,11 +51,16 @@ background-size: cover;
     color: var(--background);
     text-decoration: none;
     font-size: 1rem;
-    font-weight: 500;
-    padding: 8px 0;
+    font-weight:100;
+    font-weight: 900;
+    padding: 8px;
     transition: color 0.3s ease;
     position: relative;
     background: none;
+    background-color: transparent;
+    border: 1px solid var(--background);
+    border-radius: 5px;
+  
   }
   
   .nav-link::after {
@@ -71,10 +76,14 @@ background-size: cover;
   
   .nav-link:hover::after {
     width: 100%;
+
+    background-color: var(--background);
+    color: var(--primary-color);
   }
   
   .nav-link:hover {
-    color: var(--secondary-color);
+    background-color: var(--background);
+    color: var(--primary-color);
   }
   
   .logout-btn {

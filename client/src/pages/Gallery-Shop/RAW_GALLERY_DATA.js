@@ -1,4 +1,3 @@
-import { get } from 'http';
 import { getImageUrl } from '../../utilities/getImageUrl';
 
 export const RAW_GALLERY_DATA = {
@@ -133,29 +132,29 @@ export const RAW_GALLERY_DATA = {
   ],
   'wave-cutting-boards': [
     // By Order Items
-    {
-      name: 'Black Walnut 11" x 8 " ',
-      price: 65,
-      image: getImageUrl('/images/gallery/board1.jpg'),
-      availability: 'By Order Only',
-      images: [
-        getImageUrl('/images/gallery/river1.jpg'),
-        getImageUrl('/images/gallery/river1-angle1.jpg'),
-        getImageUrl('/images/gallery/river1-angle2.jpg'),
-        getImageUrl('/images/gallery/river1-detail.jpg')
-      ],
-      description: 'Dimensions: 0.57" H x 19.45" W x 7.78" D HEY Material: Acacia Wood \n\n Care & Safety: Food Safe; Hand Wash Only' 
-    },
-    { name: 'Black Walnut 14" x 8"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
-    { name: 'Black Walnut 19" x 10" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
-    { name: 'Black Walnut 24" x 12"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
-    { name: 'Black Walnut 32" x 8.5" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
-    { name: 'Maple Walnut 11" x 8 " ', price: 65, image: getImageUrl('/images/gallery/board1.jpg'), availability: 'By Order Only' },
-    { name: 'Maple Walnut 14" x 8"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
-    { name: 'Maple Walnut 19" x 10" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
-    { name: 'Maple Walnut 24" x 12"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
-    { name: 'Maple Walnut 32" x 8.5" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
-    // For Sale Items
+    // {
+    //   name: 'Black Walnut 11" x 8 " ',
+    //   price: 65,
+    //   image: getImageUrl('/images/gallery/board1.jpg'),
+    //   availability: 'By Order Only',
+    //   images: [
+    //     getImageUrl('/images/gallery/river1.jpg'),
+    //     getImageUrl('/images/gallery/river1-angle1.jpg'),
+    //     getImageUrl('/images/gallery/river1-angle2.jpg'),
+    //     getImageUrl('/images/gallery/river1-detail.jpg')
+    //   ],
+    //   description: 'Dimensions: 0.57" H x 19.45" W x 7.78" D HEY Material: Acacia Wood \n\n Care & Safety: Food Safe; Hand Wash Only' 
+    // },
+    // { name: 'Black Walnut 14" x 8"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
+    // { name: 'Black Walnut 19" x 10" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
+    // { name: 'Black Walnut 24" x 12"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
+    // { name: 'Black Walnut 32" x 8.5" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
+    // { name: 'Maple Walnut 11" x 8 " ', price: 65, image: getImageUrl('/images/gallery/board1.jpg'), availability: 'By Order Only' },
+    // { name: 'Maple Walnut 14" x 8"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
+    // { name: 'Maple Walnut 19" x 10" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
+    // { name: 'Maple Walnut 24" x 12"', price: 95, image: getImageUrl('/images/gallery/board2.jpg'), availability: 'By Order Only' },
+    // { name: 'Maple Walnut 32" x 8.5" ', price: 75, image: getImageUrl('/images/gallery/board3.jpg'), availability: 'By Order Only' },
+    // // For Sale Items
     { name: 'Acacia Wave N Shell 19.5" x 8" x .625"', price: 75, image: getImageUrl('/images/gallery/forSale/20251126_152728.jpg'), availability: 'For Sale' },
     { name: 'Acacia Wave N Shell 19.5" x 8" x .625"', price: 75, image: getImageUrl('/images/gallery/forSale/20251126_152602.jpg'), availability: 'For Sale' },
     { name: 'Acacia Wave N Shell 19.5" x 8" x .625"', price: 75, image: getImageUrl('/images/gallery/forSale/acWaveBoard5.jpg'), availability: 'For Sale' },
@@ -169,10 +168,10 @@ export const RAW_GALLERY_DATA = {
     {
       name: 'Maple 22.5" x 13.5" x 1.5" Wave N Shell Cutting Board',
       price: 195,
-      image: getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_132300.jpg'),
+      image: getImageUrl('/images/gallery/forSale/wave-boards/20260130_132300.jpg'),
       availability: 'For Sale',
       images: [
-        getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_132300.jpg'),
+        getImageUrl('/images/gallery/forSale/wave-boards/20260130_132309.jpg'),
         getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_132309.jpg')
       ],
       description: 'Dimensions: 22.5" x 13.5" x 1.5", Material: Maple with Ocean Wave & Shell Design \n\n Care & Safety: Food Safe; Hand Wash Only'
@@ -180,25 +179,24 @@ export const RAW_GALLERY_DATA = {
     {
       name: 'Black Walnut 21.5" x 12.5" x 1.25" Wave N Shell Cutting Board',
       price: 185,
-      image: getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_132427.jpg'),
+      image: getImageUrl('/images/gallery/forSale/wave-boards/20260130_132427.jpg'),
       availability: 'For Sale',
       images: [
-        getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_132427.jpg'),
-        getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_132431.jpg')
+        getImageUrl('/images/gallery/forSale/wave-boards/20260130_132431.jpg'),
       ],
       description: 'Dimensions: 21.5" x 12.5" x 1.25", Material: Black Walnut with Turquoise Ocean Wave & Shell Design \n\n Care & Safety: Food Safe; Hand Wash Only'
     },
     {
       name: 'Black Walnut 22" x 12" x 1" Wave N Shell Cutting Board',
       price: 175,
-      image: getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_133459.jpg'),
+      image: getImageUrl('/images/gallery/forSale/wave-boards/20260130_133459.jpg'),
       availability: 'For Sale',
       description: 'Dimensions: 22" x 12" x 1", Material: Black Walnut with Blue Ocean Wave & Shell Design \n\n Care & Safety: Food Safe; Hand Wash Only'
     },
     {
       name: 'Cherry 13.25" x 6.25" x 1" Wave Cutting Board',
       price: 95,
-      image: getImageUrl('/images/gallery/forSale/waveCuttingBoards/20260130_134000.jpg'),
+      image: getImageUrl('/images/gallery/forSale/wave-boards/20260130_134000.jpg'),
       availability: 'For Sale',
       description: 'Dimensions: 13.25" x 6.25" x 1", Material: Cherry with Ocean Wave Design \n\n Care & Safety: Food Safe; Hand Wash Only'
     },
@@ -324,12 +322,13 @@ export const RAW_GALLERY_DATA = {
   ],
   'holidays': [
     // By Order Items
-    { name: 'Custom Coaster Set', price: 40, image: getImageUrl('/images/gallery/other1.jpg'), availability: 'By Order Only' },
-    { name: 'Wine Rack', price: 120, image: getImageUrl('/images/gallery/other2.jpg'), availability: 'By Order Only' },
-    { name: 'Wine Rack', price: 120, image: getImageUrl('/images/gallery/other2.jpg'), availability: 'By Order Only' },
+    { name: 'Christmas Winter Scene', price: 140, image: getImageUrl('/images/gallery/forSale/holiday/20260130_131925.jpg'), availability: 'For Sale', images: [
+      getImageUrl('/images/gallery/forSale/holiday/20260130_131957.jpg', )
+    ], description: 'Christmas Winter Wonderland including fake snow, candy canes, rein deer, angels, reefs, trees' },
+    { name: 'Acacia Christmas Theme Cutting Board', price: 75, image: getImageUrl('/images/gallery/forSale/holiday/20260130_133919.jpg'), availability: 'For Sale', description: 'Snow man, Santa, Christmas Tree and snow with a star filled night sky ' },
   ],
   'other': [
-    { name: 'Sea Shell Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131709.jpg'), availability: 'For Sale' },
+    { name: 'Sea Shell Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131709.jpg'), availability: 'For Sale',   },
     { name: 'Floral Soap Holder', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131717.jpg'), availability: 'For Sale' },
     { name: 'Trinket Trays  1pc', price: 25, image: getImageUrl('/images/gallery/forSale/bathroom/20251116_131625(1).jpg'), availability: 'For Sale', images: [
       getImageUrl('/images/gallery/forSale/bathroom/20251116_131610.jpg', getImageUrl('/images/gallery/forSale/bathroom/20251116_131509.jpg'))
