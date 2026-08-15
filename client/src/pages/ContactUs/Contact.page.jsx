@@ -5,10 +5,10 @@ import './Contact.css';
 const Contact = () => {
   // You can update these with your actual contact information
   const contactInfo = {
-    phone: '+1 (835)-204-2961',
+    phone: '+1 (267)-221-9497',
     email: '4everlilyswc@gmail.com',
     facebook: 'facebook.com/4everlilys',
-    instagram: '@yourcompany',
+    instagram: 'COMING SOON',
     
   };
 
